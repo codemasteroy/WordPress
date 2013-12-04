@@ -332,6 +332,8 @@ function wp_admin_bar_site_menu( $wp_admin_bar ) {
  * @param WP_Admin_Bar $wp_admin_bar
  */
 function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
+	global $current_user;
+
 	// Don't show for logged out users or single site mode.
 	if ( ! is_user_logged_in() || ! is_multisite() )
 		return;
@@ -400,7 +402,21 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		),
 	) );
 
+	if ( count( $wp_admin_bar->user->blogs ) > 15 ) {
+		$wp_admin_bar->add_menu( array(
+			'parent' => 'my-sites-list',
+			'id'    => 'my-sites-list-all',
+			'title' => __( 'See All' ),
+			'href'  => get_admin_url( get_user_meta($current_user->ID, 'primary_blog', true), 'my-sites.php' ),
+		) );
+	}
+
+	$_my_blog_count = 0;
+
 	foreach ( (array) $wp_admin_bar->user->blogs as $blog ) {
+		if ($_my_blog_count == 14)
+			break;
+
 		switch_to_blog( $blog->userblog_id );
 
 		$blavatar = '<div class="blavatar"></div>';
@@ -448,6 +464,8 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		) );
 
 		restore_current_blog();
+
+		$_my_blog_count++;
 	}
 }
 
