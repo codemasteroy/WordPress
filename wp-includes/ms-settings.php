@@ -78,6 +78,13 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 			if ( $current_blog )
 				wp_cache_set( 'current_blog_' . $domain . $path, $current_blog, 'site-options' );
 		}
+		// One last check with current site domain and given path
+		$possible_current_blog = wp_cache_get( 'current_blog_' . $current_site->domain . $path, 'site-options' );
+		if ( ! $possible_current_blog ) {
+			$possible_current_blog = get_blog_details( array( 'domain' => $current_site->domain, 'path' => $path ), false );
+			if ( $possible_current_blog )
+				wp_cache_set( 'current_blog_' . $current_site->domain . $path, $possible_current_blog, 'site-options' );
+        }
 		unset($reserved_blognames);
 	}
 
@@ -96,7 +103,11 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 	if ( ! defined( 'WP_INSTALLING' ) ) {
 		if ( $current_site && ! $current_blog ) {
 			if ( $current_site->domain != $_SERVER[ 'HTTP_HOST' ] ) {
-				header( 'Location: http://' . $current_site->domain . $current_site->path );
+				if ( isset( $possible_current_blog ) && $possible_current_blog ) {
+                    header( 'Location: http://' . $possible_current_blog->domain . $possible_current_blog->path );
+                } else {
+					header( 'Location: http://' . $current_site->domain . $current_site->path );
+				}
 				exit;
 			}
 			$current_blog = get_blog_details( array( 'domain' => $current_site->domain, 'path' => $current_site->path ), false );
