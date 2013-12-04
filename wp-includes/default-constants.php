@@ -97,8 +97,13 @@ function wp_initial_constants() {
  * @since 3.0.0
  */
 function wp_plugin_directory_constants() {
-	if ( !defined('WP_CONTENT_URL') )
-		define( 'WP_CONTENT_URL', get_option('siteurl') . '/wp-content'); // full url - WP_CONTENT_DIR is defined further up
+	if ( !defined('WP_CONTENT_URL') ) {
+		if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) {
+			define( 'WP_CONTENT_URL', preg_replace( '/^http:/', 'https:' , get_option('siteurl') ) . '/wp-content' ); // full url - WP_CONTENT_DIR is defined further up with http: replaced by https:
+		} else {
+			define( 'WP_CONTENT_URL', get_option('siteurl') . '/wp-content'); // full url - WP_CONTENT_DIR is defined further up
+		}
+	}
 
 	/**
 	 * Allows for the plugins directory to be moved from the default location.
