@@ -424,6 +424,46 @@ function clean_blog_cache( $blog ) {
 }
 
 /**
+ * Update site options and refresh blog details when options are updated using
+ * update_option();
+ *
+ * @since 3.9
+ *
+ * @param string $option The option key
+ * @param mixed $old_value The old option value
+ * @param mixed $newvalue The new option value
+ */
+function update_any_blog_option( $option, $old_value, $new_value ) {
+    global $wpdb;
+
+	if ( defined( 'WP_INSTALLING' ) )
+		return;
+
+    wp_cache_set( $wpdb->blogid . '-' . $option . '-blog_option', $new_value, 'site-options' );
+    if ( in_array( $option, array( 'blogname', 'siteurl', 'post_count' ) ) ) {
+        refresh_blog_details( $wpdb->blogid );
+    }
+}
+add_action( 'updated_option', 'update_any_blog_option', 10, 3 );
+
+/**
+ * Delete site options when options are updated using delete_option();
+ *
+ * @since 3.9
+ *
+ * @param string $option The option key
+ */
+function delete_any_blog_option( $option ) {
+    global $wpdb;
+
+	if ( defined( 'WP_INSTALLING' ) )
+		return;
+
+    wp_cache_delete( $wpdb->blogid . '-' . $option . '-blog_option', 'site-options' );
+}
+add_action( 'deleted_option', 'delete_any_blog_option', 10, 1 );
+
+/**
  * Retrieve option value for a given blog id based on name of option.
  *
  * If the option does not exist or does not have a value, then the return value
