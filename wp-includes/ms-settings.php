@@ -44,6 +44,7 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 	$path = preg_replace( '|([a-z0-9-]+.php.*)|', '', $_SERVER['REQUEST_URI'] );
 	$path = str_replace ( '/wp-admin/', '/', $path );
 	$path = preg_replace( '|(/[a-z0-9-]+?/).*|', '$1', $path );
+	$path = strtolower( $path );
 
 	$current_site = wpmu_current_site();
 	if ( ! isset( $current_site->blog_id ) )
