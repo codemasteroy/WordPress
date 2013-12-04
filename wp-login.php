@@ -523,7 +523,7 @@ case 'retrievepassword' :
 	$user_login = isset($_POST['user_login']) ? wp_unslash($_POST['user_login']) : '';
 
 ?>
-
+<?php do_action('lost_password_form_before'); ?>
 <form name="lostpasswordform" id="lostpasswordform" action="<?php echo esc_url( site_url( 'wp-login.php?action=lostpassword', 'login_post' ) ); ?>" method="post">
 	<p>
 		<label for="user_login" ><?php _e('Username or E-mail:') ?><br />
@@ -539,7 +539,7 @@ case 'retrievepassword' :
 	<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>" />
 	<p class="submit"><input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="<?php esc_attr_e('Get New Password'); ?>" /></p>
 </form>
-
+<?php do_action('lost_password_form_after'); ?>
 <p id="nav">
 <a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e('Log in') ?></a>
 <?php
@@ -601,6 +601,7 @@ case 'rp' :
 	login_header(__('Reset Password'), '<p class="message reset-pass">' . __('Enter your new password below.') . '</p>', $errors );
 
 ?>
+<?php do_action('reset_pass_form_before'); ?>
 <form name="resetpassform" id="resetpassform" action="<?php echo esc_url( site_url( 'wp-login.php?action=resetpass&key=' . urlencode( $_GET['key'] ) . '&login=' . urlencode( $_GET['login'] ), 'login_post' ) ); ?>" method="post" autocomplete="off">
 	<input type="hidden" id="user_login" value="<?php echo esc_attr( $_GET['login'] ); ?>" autocomplete="off" />
 
@@ -619,7 +620,7 @@ case 'rp' :
 	<br class="clear" />
 	<p class="submit"><input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="<?php esc_attr_e('Reset Password'); ?>" /></p>
 </form>
-
+<?php do_action('reset_pass_form_after'); ?>
 <p id="nav">
 <a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a>
 <?php
@@ -678,7 +679,7 @@ case 'register' :
 	$redirect_to = apply_filters( 'registration_redirect', $registration_redirect );
 	login_header(__('Registration Form'), '<p class="message register">' . __('Register For This Site') . '</p>', $errors);
 ?>
-
+<?php do_action('register_form_before'); ?>
 <form name="registerform" id="registerform" action="<?php echo esc_url( site_url('wp-login.php?action=register', 'login_post') ); ?>" method="post">
 	<p>
 		<label for="user_login"><?php _e('Username') ?><br />
@@ -701,7 +702,7 @@ case 'register' :
 	<input type="hidden" name="redirect_to" value="<?php echo esc_attr( $redirect_to ); ?>" />
 	<p class="submit"><input type="submit" name="wp-submit" id="wp-submit" class="button button-primary button-large" value="<?php esc_attr_e('Register'); ?>" /></p>
 </form>
-
+<?php do_action('register_form_after'); ?>
 <p id="nav">
 <a href="<?php echo esc_url( wp_login_url() ); ?>"><?php _e( 'Log in' ); ?></a> |
 <a href="<?php echo esc_url( wp_lostpassword_url() ); ?>" title="<?php esc_attr_e( 'Password Lost and Found' ) ?>"><?php _e( 'Lost your password?' ); ?></a>
@@ -837,7 +838,7 @@ default:
 		$user_login = ( 'incorrect_password' == $errors->get_error_code() || 'empty_password' == $errors->get_error_code() ) ? esc_attr(wp_unslash($_POST['log'])) : '';
 	$rememberme = ! empty( $_POST['rememberme'] );
 ?>
-
+<?php do_action('login_form_before'); ?>
 <form name="loginform" id="loginform" action="<?php echo esc_url( site_url( 'wp-login.php', 'login_post' ) ); ?>" method="post">
 	<p>
 		<label for="user_login"><?php _e('Username') ?><br />
@@ -869,7 +870,7 @@ default:
 		<input type="hidden" name="testcookie" value="1" />
 	</p>
 </form>
-
+<?php do_action('login_form_after'); ?>
 <?php if ( ! $interim_login ) { ?>
 <p id="nav">
 <?php if ( ! isset( $_GET['checkemail'] ) || ! in_array( $_GET['checkemail'], array( 'confirm', 'newpass' ) ) ) :
