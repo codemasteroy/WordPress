@@ -53,7 +53,7 @@ if ( ! function_exists('maybe_create_table') ) :
  */
 function maybe_create_table($table_name, $create_ddl) {
 	global $wpdb;
-	foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
+	foreach ($wpdb->get_col("SHOW TABLES LIKE '{$table_name}'",0) as $table ) {
 		if ($table == $table_name) {
 			return true;
 		}
@@ -61,7 +61,7 @@ function maybe_create_table($table_name, $create_ddl) {
 	//didn't find it try to create it.
 	$wpdb->query($create_ddl);
 	// we cannot directly tell that whether this succeeded!
-	foreach ($wpdb->get_col("SHOW TABLES",0) as $table ) {
+	foreach ($wpdb->get_col("SHOW TABLES LIKE '{$table_name}'",0) as $table ) {
 		if ($table == $table_name) {
 			return true;
 		}
