@@ -238,8 +238,22 @@ function update_option( $option, $value ) {
 
 	do_action( 'update_option', $option, $old_value, $value );
 	$result = $wpdb->update( $wpdb->options, array( 'option_value' => $serialized_value ), array( 'option_name' => $option ) );
-	if ( ! $result )
+	if ( ! $result ) {
+		if ( ! defined( 'WP_INSTALLING' ) ) {
+			$alloptions = wp_load_alloptions();
+			if ( isset( $alloptions[$option] ) ) {
+				unset($alloptions[$option]);
+				wp_cache_set( 'alloptions', $alloptions, 'options' );
+			}
+		} else if ( !isset( $alloptions[$option] ) ) {
+			wp_cache_delete( 'alloptions', 'options' );
+		} else {
+			wp_cache_delete( $option, 'options' );
+		}
+		add_option( $option, $newvalue );
+
 		return false;
+	}
 
 	$notoptions = wp_cache_get( 'notoptions', 'options' );
 	if ( is_array( $notoptions ) && isset( $notoptions[$option] ) ) {
@@ -260,6 +274,7 @@ function update_option( $option, $value ) {
 	do_action( "update_option_{$option}", $old_value, $value );
 	do_action( 'updated_option', $option, $old_value, $value );
 	return true;
+
 }
 
 /**
@@ -942,6 +957,9 @@ function update_site_option( $option, $value ) {
 		if ( $result ) {
 			$cache_key = "{$wpdb->siteid}:$option";
 			wp_cache_set( $cache_key, $value, 'site-options' );
+		} else {
+			wp_cache_delete( $cache_key, 'site-options' );
+			add_site_option( $option, $value );
 		}
 	}
 
