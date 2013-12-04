@@ -232,7 +232,7 @@ function update_option( $option, $value ) {
 		return false;
 
 	if ( false === $old_value )
-		return add_option( $option, $value );
+		return add_option( $option, $value, null, 'no' );
 
 	$serialized_value = maybe_serialize( $value );
 
