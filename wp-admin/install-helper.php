@@ -51,22 +51,16 @@ if ( ! function_exists('maybe_create_table') ) :
  * @param string $create_ddl Create database table SQL.
  * @return bool False on error, true if already exists or success.
  */
-function maybe_create_table($table_name, $create_ddl) {
+function maybe_create_table( $table_name, $create_ddl ) {
 	global $wpdb;
-	foreach ($wpdb->get_col("SHOW TABLES LIKE '{$table_name}'",0) as $table ) {
-		if ($table == $table_name) {
-			return true;
-		}
-	}
+	$query = $wpdb->prepare( "SHOW TABLES LIKE %s", $table_name );
+	if ( strtolower( $wpdb->get_var( $query ) ) == strtolower( $table_name ) ) 
+		return true;
+	
 	//didn't find it try to create it.
 	$wpdb->query($create_ddl);
 	// we cannot directly tell that whether this succeeded!
-	foreach ($wpdb->get_col("SHOW TABLES LIKE '{$table_name}'",0) as $table ) {
-		if ($table == $table_name) {
-			return true;
-		}
-	}
-	return false;
+	return ( strtolower( $wpdb->get_var( $query ) ) == strtolower( $table_name ) );
 }
 endif;
 
