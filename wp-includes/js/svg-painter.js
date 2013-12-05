@@ -167,10 +167,10 @@ var svgPainter = ( function( $, window, document, undefined ) {
 				return;
 			}
 
-			xml = $element.data( 'mp6-svg-' + color );
+			xml = $element.data( 'wp-ui-svg-' + color );
 
 			if ( ! xml ) {
-				encoded = $element.css( 'background-image' ).match( /.+data:image\/svg\+xml;base64,(.+?)['"] ?\)/ );
+				encoded = $element.css( 'background-image' ).match( /.+data:image\/svg\+xml;base64,(.+?)['"]? ?\)/ );
 
 				if ( ! encoded || ! encoded[1] ) {
 					return;
@@ -197,10 +197,10 @@ var svgPainter = ( function( $, window, document, undefined ) {
 					xml = base64.btoa( xml );
 				}
 
-				$element.data( 'mp6-svg-' + color, xml );
+				$element.data( 'wp-ui-svg-' + color, xml );
 			}
 
-			$element.attr( 'style', 'background-image: url("data:image/svg+xml;base64,' + xml + '") !important;' );
+			$element.css( 'background-image', 'url("data:image/svg+xml;base64,' + xml + '")' );
 		}
 	};
 

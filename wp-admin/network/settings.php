@@ -67,7 +67,7 @@ if ( $_POST ) {
 
 	/**
 	 * Fires after the network options are updated.
-	 * 
+	 *
 	 * @since MU
 	 */
 	do_action( 'update_wpmu_options' );
@@ -101,7 +101,7 @@ if ( isset( $_GET['updated'] ) ) {
 				<td>
 					<input name="admin_email" type="text" id="admin_email" class="regular-text" value="<?php echo esc_attr( get_site_option('admin_email') ) ?>" />
 					<p class="description">
-						<?php _e( 'This email address will send update notifcations, and also receive site creation and new user registration notifications.' ); ?> 
+						<?php _e( 'This email address will receive notifications. Registration and support emails will also come from this address.' ); ?>
 					</p>	
 				</td>
 			</tr>
@@ -312,7 +312,7 @@ if ( isset( $_GET['updated'] ) ) {
 			 * screen in their individual sites' dashboards.
 			 *
 			 * @since MU
-			 * 
+			 *
 			 * @param array $admin_menus The menu items available.
 			 */
 			$menu_items = apply_filters( 'mu_menu_items', array( 'plugins' => __( 'Plugins' ) ) );

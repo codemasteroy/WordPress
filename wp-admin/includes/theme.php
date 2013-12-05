@@ -203,6 +203,7 @@ function get_theme_feature_list( $api = true ) {
 		),
 
 		__( 'Features' ) => array(
+			'accessibility-ready'   => __( 'Accessibility Ready' ),
 			'blavatar'              => __( 'Blavatar' ),
 			'buddypress'            => __( 'BuddyPress' ),
 			'custom-background'     => __( 'Custom Background' ),
@@ -301,9 +302,9 @@ function themes_api( $action, $args = null ) {
 	 * Filter arguments used to query for installer pages from the WordPress.org Themes API.
 	 *
 	 * Important: An object MUST be returned to this filter.
-	 * 
+	 *
 	 * @since 2.8.0
-	 * 
+	 *
 	 * @param object $args   Arguments used to query for installer pages from the WordPress.org Themes API.
 	 * @param string $action Requested action. Likely values are 'theme_information',
 	 *                       'feature_list', or 'query_themes'.
@@ -315,7 +316,7 @@ function themes_api( $action, $args = null ) {
 	 *
 	 * Returning a value of true to this filter allows a theme to completely
 	 * override the built-in WordPress.org API.
-	 * 
+	 *
 	 * @since 2.8.0
 	 *
 	 * @param bool   $bool   Whether to override the WordPress.org Themes API. Default false.
@@ -424,5 +425,14 @@ function wp_prepare_themes_for_js( $themes = null ) {
 		);
 	}
 
-	return $prepared_themes;
+	/**
+	 * Filter the themes prepared for JavaScript, for themes.php.
+	 *
+	 * Could be useful for changing the order, which is by name by default.
+	 *
+	 * @since 3.8.0
+	 *
+	 * @param array $prepared_themes Array of themes.
+	 */
+	return apply_filters( 'wp_prepare_themes_for_js', $prepared_themes );
 }

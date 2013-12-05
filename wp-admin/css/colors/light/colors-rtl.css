@@ -1,4 +1,4 @@
-@import url("../../colors.css");
+@import url("../../colors-rtl.css");
 /*
  * Button mixin- creates 3d-ish button effect with correct 
  * highlights/shadows, based on a base color.
@@ -113,7 +113,7 @@ strong .post-com-count span {
   background: white; }
 
 #adminmenu li.wp-has-submenu.wp-not-current-submenu.opensub:hover:after {
-  border-right-color: white; }
+  border-left-color: white; }
 
 #adminmenu .wp-submenu .wp-submenu-head {
   color: #686868; }
@@ -130,7 +130,7 @@ strong .post-com-count span {
     color: #04a4cc; }
 
 ul#adminmenu a.wp-has-current-submenu:after, ul#adminmenu > li.current > a.current:after {
-  border-right-color: whitesmoke; }
+  border-left-color: whitesmoke; }
 
 #adminmenu li.current a.menu-top, #adminmenu li.wp-has-current-submenu a.wp-has-current-submenu, #adminmenu li.wp-has-current-submenu .wp-submenu .wp-submenu-head, .folded #adminmenu li.current.menu-top {
   color: white;
