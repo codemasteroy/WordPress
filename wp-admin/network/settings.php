@@ -105,6 +105,13 @@ if ( isset( $_GET['updated'] ) ) {
 					</p>	
 				</td>
 			</tr>
+			<?php 
+			/**
+			 * Fires at the end of the Network Settings form, before the submit button.
+			 *
+			 * @since MU
+			 */
+			do_action( 'wpmu_operational_options' ); ?>
 		</table>
 		<h3><?php _e( 'Registration Settings' ); ?></h3>
 		<table class="form-table">
@@ -179,7 +186,13 @@ if ( isset( $_GET['updated'] ) ) {
 					</p>
 				</td>
 			</tr>
-
+			<?php 
+			/**
+			 * Fires at the end of the Network Settings form, before the submit button.
+			 *
+			 * @since MU
+			 */
+			do_action( 'wpmu_registration_options' ); ?>
 		</table>
 		<h3><?php _e('New Site Settings'); ?></h3>
 		<table class="form-table">
@@ -252,6 +265,14 @@ if ( isset( $_GET['updated'] ) ) {
 					</p>
 				</td>
 			</tr>
+
+			<?php 
+			/**
+			 * Fires at the end of the Network Settings form, before the submit button.
+			 *
+			 * @since MU
+			 */
+			do_action( 'wpmu_newsite_options' ); ?>
 		</table>
 		<h3><?php _e( 'Upload Settings' ); ?></h3>
 		<table class="form-table">
@@ -271,6 +292,13 @@ if ( isset( $_GET['updated'] ) ) {
 				<th scope="row"><label for="fileupload_maxk"><?php _e( 'Max upload file size' ) ?></label></th>
 				<td><?php printf( _x( '%s KB', 'File size in kilobytes' ), '<input name="fileupload_maxk" type="number" min="0" style="width: 100px" id="fileupload_maxk" value="' . esc_attr( get_site_option( 'fileupload_maxk', 300 ) ) . '" />' ); ?></td>
 			</tr>
+			<?php 
+			/**
+			 * Fires at the end of the Network Settings form, before the submit button.
+			 *
+			 * @since MU
+			 */
+			do_action( 'wpmu_upload_options' ); ?>
 		</table>
 
 <?php
@@ -288,6 +316,13 @@ if ( isset( $_GET['updated'] ) ) {
 						</select>
 					</td>
 				</tr>
+				<?php 
+				/**
+				 * Fires at the end of the Network Settings form, before the submit button.
+				 *
+				 * @since MU
+				 */
+				do_action( 'wpmu_language_options' ); ?>
 		</table>
 <?php
 		} // languages
@@ -322,6 +357,14 @@ if ( isset( $_GET['updated'] ) ) {
 			?>
 				</td>
 			</tr>
+
+			<?php 
+			/**
+			 * Fires at the end of the Network Settings form, before the submit button.
+			 *
+			 * @since MU
+			 */
+			do_action( 'wpmu_menu_options' ); ?>
 		</table>
 
 		<?php 
