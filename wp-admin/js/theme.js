@@ -129,11 +129,10 @@ themes.Collection = Backbone.Collection.extend({
 	// Performs a search within the collection
 	// @uses RegExp
 	search: function( term ) {
-		var self = this,
-			match, results, haystack;
+		var match, results, haystack;
 
 		// Start with a full collection
-		self.reset( themes.data.themes );
+		this.reset( themes.data.themes, { silent: true } );
 
 		// The RegExp object to match
 		//
@@ -144,17 +143,17 @@ themes.Collection = Backbone.Collection.extend({
 
 		// Find results
 		// _.filter and .test
-		results = self.filter( function( data ) {
+		results = this.filter( function( data ) {
 			haystack = _.union( data.get( 'name' ), data.get( 'description' ), data.get( 'author' ), data.get( 'tags' ) );
 
-			if ( match.test( data.get( 'author' ) ) ) {
+			if ( match.test( data.get( 'author' ) ) && term.length > 2 ) {
 				data.set( 'displayAuthor', true );
 			}
 
 			return match.test( haystack );
 		});
 
-		self.reset( results );
+		this.reset( results );
 	},
 
 	// Paginates the collection with a helper method

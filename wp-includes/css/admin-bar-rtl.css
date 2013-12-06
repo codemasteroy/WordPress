@@ -120,7 +120,7 @@
 #wpadminbar .shortlink-input {
 	height: 32px;
 	display: block;
-	padding: 0 10px;
+	padding: 0 7px 0 8px;
 	margin: 0;
 }
 
@@ -309,13 +309,16 @@
 	position: relative;
 	left: auto;
 	margin: 0;
-	background: #4b4b4b;
 	-webkit-box-shadow: none;
 	box-shadow: none;
 }
 
-#wpadminbar .quicklinks .menupop .ab-sub-secondary > li:hover > a,
-#wpadminbar .quicklinks .menupop .ab-sub-secondary > li.hover > a,
+#wpadminbar .quicklinks .menupop ul.ab-sub-secondary,
+#wpadminbar .quicklinks .menupop ul.ab-sub-secondary .ab-submenu {
+	background: #4b4b4b;
+}
+
+#wpadminbar .quicklinks .menupop .ab-sub-secondary > li > a:hover,
 #wpadminbar .quicklinks .menupop .ab-sub-secondary > li .ab-item:focus a {
 	color: #2ea2cc;
 }
@@ -423,14 +426,14 @@
  * WP Logo
  */
 #wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon {
-	width: 20px;
+	width: 15px;
 	height: 20px;
 	margin-left: 0;
 	padding: 6px 0 5px;
 }
 
 #wpadminbar #wp-admin-bar-wp-logo > .ab-item {
-	padding: 0 8px 0 8px;
+	padding: 0 7px;
 }
 
 #wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon:before {
@@ -762,7 +765,7 @@
 
 	#wpadminbar #wp-admin-bar-wp-logo > .ab-item .ab-icon {
 		padding: 0;
-		width: 50px;
+		width: 55px;
 		height: 46px;
 		text-align: center;
 		vertical-align: top;
@@ -785,7 +788,7 @@
 		text-indent: 100%;
 		white-space: nowrap;
 		overflow: hidden;
-		width: 50px;
+		width: 55px;
 		padding: 0;
 		color: #999;
 		position: relative;
@@ -904,18 +907,32 @@
 	}
 
 	/* Hide all third party items */
-	#wp-admin-bar-top-secondary > li {
+	#wpadminbar li {
 		display: none;
 	}
+	
+	/* Allow dropdown list items to appear normally */
+	#wpadminbar li:hover ul li,
+	#wpadminbar li:hover ul li:hover ul li {
+		display: list-item;
+	}
+	
+	/* Override default min-width so dropdown lists aren't stretched
+		to 100% viewport width at responsive sizes. */
+	#wpadminbar .ab-top-menu > .menupop > .ab-sub-wrapper {
+		min-width: intrinsic;
+	}
 
-	#wp-admin-bar-root-default li#wp-admin-bar-wp-logo,
-	#wp-admin-bar-root-default li#wp-admin-bar-my-sites,
-	#wp-admin-bar-root-default li#wp-admin-bar-site-name,
-	#wp-admin-bar-root-default li#wp-admin-bar-new-content,
-	#wp-admin-bar-root-default li#wp-admin-bar-edit,
-	#wp-admin-bar-root-default li#wp-admin-bar-comments,
-	#wp-admin-bar-root-default li#wp-admin-bar-new-content,
-	#wp-admin-bar-top-secondary li#wp-admin-bar-my-account {
+	#wpadminbar li#wp-admin-bar-menu-toggle,
+	#wpadminbar li#wp-admin-bar-wp-logo,
+	#wpadminbar li#wp-admin-bar-my-sites,
+	#wpadminbar li#wp-admin-bar-updates,
+	#wpadminbar li#wp-admin-bar-site-name,
+	#wpadminbar li#wp-admin-bar-new-content,
+	#wpadminbar li#wp-admin-bar-edit,
+	#wpadminbar li#wp-admin-bar-comments,
+	#wpadminbar li#wp-admin-bar-new-content,
+	#wpadminbar li#wp-admin-bar-my-account {
 		display: block;
 	}
 
@@ -937,30 +954,16 @@
 		position: static;
 	}
 
-	#wpadminbar #wp-admin-bar-comments,
-	#wpadminbar #wp-admin-bar-new-content,
 	#wpadminbar #wp-admin-bar-my-account {
 		float: left;
 	}
 
-	#wpadminbar #wp-admin-bar-comments .ab-sub-wrapper,
-	#wpadminbar #wp-admin-bar-new-content .ab-sub-wrapper,
 	#wpadminbar #wp-admin-bar-my-account .ab-sub-wrapper {
 		left: 0;
 		right: auto;
 	}
 
-	#wpadminbar ul#wp-admin-bar-root-default > li#wp-admin-bar-comments {
-		margin-left: 100px;
-	}
 
-	#wpadminbar ul#wp-admin-bar-root-default > li#wp-admin-bar-new-content {
-		margin-left: -98px;
-	}
-
-	#wpadminbar ul#wp-admin-bar-top-secondary > li#wp-admin-bar-my-account {
-		margin-left: -150px;
-	}
 
 	.network-admin #wpadminbar ul#wp-admin-bar-top-secondary > li#wp-admin-bar-my-account {
 		margin-left: 0;
@@ -995,10 +998,26 @@
 	#wpadminbar #wp-admin-bar-wp-logo.menupop .ab-sub-wrapper {
 		margin-right: 0;
 	}
+	
+	#wpadminbar .ab-top-menu > .menupop li > .ab-sub-wrapper {
+		margin: 0;
+		width: 100%;
+		top: auto;
+		right: auto;
+		position: relative;
+	}
+	
+	#wpadminbar .ab-top-menu > .menupop li > .ab-sub-wrapper .ab-item {
+		font-size: 16px;
+		padding: 6px 30px 19px 15px;
+	}
+	
+	#wpadminbar li:hover ul li ul li {
+		display: list-item;
+	}
 
-	#wp-admin-bar-root-default li#wp-admin-bar-wp-logo,
-	#wp-admin-bar-root-default li#wp-admin-bar-updates,
-	#wp-admin-bar-root-default li#wp-admin-bar-view {
+	#wpadminbar li#wp-admin-bar-wp-logo,
+	#wpadminbar li#wp-admin-bar-updates {
 		display: none;
 	}
 }

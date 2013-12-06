@@ -956,7 +956,8 @@ p.popular-tags,
 .wp-editor-container,
 #post-status-info,
 .popular-tags,
-.feature-filter {
+.feature-filter,
+.imgedit-group {
 	border: 1px solid #ddd;
 	-webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 	box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -979,7 +980,8 @@ table.widefat,
 p.popular-tags,
 .widgets-holder-wrap,
 .popular-tags,
-.feature-filter {
+.feature-filter,
+.imgedit-group {
 	background: #fff;
 }
 
@@ -1796,11 +1798,6 @@ h2.nav-tab-wrapper, h3.nav-tab-wrapper {
 
 .about-wrap .feature-section h4 {
 	color: #464646;
-}
-
-.about-wrap .feature-section img {
-	background: #fff;
-	border-color: #ccc;
 }
 
 .about-wrap .feature-section .col-2:before,

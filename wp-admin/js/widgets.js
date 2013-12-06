@@ -403,7 +403,7 @@ wpWidgets = {
 	},
 
 	addWidget: function( chooser ) {
-		var widget, widgetId, add, n,
+		var widget, widgetId, add, n, viewportTop, viewportBottom, sidebarBounds,
 			sidebarId = chooser.find( '.widgets-chooser-selected' ).data('sidebarId'),
 			sidebar = $( '#' + sidebarId );
 
@@ -433,16 +433,31 @@ wpWidgets = {
 		// Open the widgets container
 		sidebar.closest( '.widgets-holder-wrap' ).removeClass('closed');
 
-		sidebar.find('.sidebar-description').after( widget );
+		sidebar.append( widget );
 		sidebar.sortable('refresh');
 
 		wpWidgets.save( widget, 0, 0, 1 );
 		// No longer "new" widget
 		widget.find( 'input.add_new' ).val('');
 
-		$( 'html, body' ).animate({
-			scrollTop: sidebar.offset().top - 130
-		}, 200 );
+		/* 
+		 * Check if any part of the sidebar is visible in the viewport. If it is, don't scroll.
+		 * Otherwise, scroll up to so the sidebar is in view.
+		 *
+		 * We do this by comparing the top and bottom, of the sidebar so see if they are within
+		 * the bounds of the viewport.
+		 */
+		viewportTop = $(window).scrollTop();
+		viewportBottom = viewportTop + $(window).height();
+		sidebarBounds = sidebar.offset();
+		
+		sidebarBounds.bottom = sidebarBounds.top + sidebar.outerHeight();
+
+		if ( viewportTop > sidebarBounds.bottom || viewportBottom < sidebarBounds.top ) {
+			$( 'html, body' ).animate({
+				scrollTop: sidebarBounds.top - 130
+			}, 200 );
+		}
 
 		window.setTimeout( function() {
 			// Cannot use a callback in the animation above as it fires twice,

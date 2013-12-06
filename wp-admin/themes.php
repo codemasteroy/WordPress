@@ -220,13 +220,18 @@ if ( ! is_multisite() && current_user_can('edit_themes') && $broken_themes = wp_
 	<# } else { #>
 		<div class="theme-screenshot blank"></div>
 	<# } #>
+	<span class="more-details"><?php _e( 'Theme Details' ); ?></span>
 	<div class="theme-author"><?php printf( __( 'By %s' ), '{{{ data.author }}}' ); ?></div>
-	<h3 class="theme-name">{{{ data.name }}}</h3>
+	
+	<# if ( data.active ) { #>
+		<h3 class="theme-name"><span><?php _ex( 'Active:', 'theme' ); ?></span> {{{ data.name }}}</h3>
+	<# } else { #>
+		<h3 class="theme-name">{{{ data.name }}}</h3>
+	<# } #>
 
 	<div class="theme-actions">
 
 	<# if ( data.active ) { #>
-		<span class="current-label"><?php _e( 'Current Theme' ); ?></span>
 		<# if ( data.actions.customize ) { #>
 			<a class="button button-primary hide-if-no-customize" href="{{ data.actions.customize }}"><?php _e( 'Customize' ); ?></a>
 		<# } #>
@@ -269,7 +274,7 @@ if ( ! is_multisite() && current_user_can('edit_themes') && $broken_themes = wp_
 					<span class="current-label"><?php _e( 'Current Theme' ); ?></span>
 				<# } #>
 				<h3 class="theme-name">{{{ data.name }}}<span class="theme-version"><?php printf( __( 'Version: %s' ), '{{{ data.version }}}' ); ?></span></h3>
-				<h4 class="theme-author"><?php printf( __( 'By %s' ), '{{{ data.author }}}' ); ?></h4>
+				<h4 class="theme-author"><?php printf( __( 'By %s' ), '{{{ data.authorAndUri }}}' ); ?></h4>
 
 				<# if ( data.hasUpdate ) { #>
 				<div class="theme-update-message">

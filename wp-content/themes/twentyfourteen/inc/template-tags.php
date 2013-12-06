@@ -111,7 +111,7 @@ function twentyfourteen_posted_on() {
 	}
 
 	// Set up and print post meta information.
-	printf( __( '<span class="entry-date"><a href="%1$s" rel="bookmark"><time class="entry-date" datetime="%2$s">%3$s</time></a></span> <span class="byline"><span class="author vcard"><a class="url fn n" href="%4$s" rel="author">%5$s</a></span></span>', 'twentyfourteen' ),
+	printf( '<span class="entry-date"><a href="%1$s" rel="bookmark"><time class="entry-date" datetime="%2$s">%3$s</time></a></span> <span class="byline"><span class="author vcard"><a class="url fn n" href="%4$s" rel="author">%5$s</a></span></span>',
 		esc_url( get_permalink() ),
 		esc_attr( get_the_date( 'c' ) ),
 		esc_html( get_the_date() ),
@@ -194,7 +194,7 @@ function twentyfourteen_post_thumbnail() {
 
 	<?php else : ?>
 
-	<a class="post-thumbnail" href="<?php the_permalink(); ?>" rel="<?php the_ID(); ?>">
+	<a class="post-thumbnail" href="<?php the_permalink(); ?>">
 	<?php
 		if ( ( ! is_active_sidebar( 'sidebar-2' ) || is_page_template( 'page-templates/full-width.php' ) ) ) {
 			the_post_thumbnail( 'twentyfourteen-full-width' );

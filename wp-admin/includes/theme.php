@@ -197,9 +197,10 @@ function get_theme_feature_list( $api = true ) {
 			'right-sidebar' => __( 'Right Sidebar' ),
 		),
 
-		__( 'Width' ) => array(
-			'fixed-width'    => __( 'Fixed Width' ),
-			'flexible-width' => __( 'Flexible Width' ),
+		__( 'Layout' ) => array(
+			'fixed-layout'      => __( 'Fixed Layout' ),
+			'fluid-layout'      => __( 'Fluid Layout' ),
+			'responsive-layout' => __( 'Responsive Layout' ),
 		),
 
 		__( 'Features' ) => array(
@@ -410,7 +411,8 @@ function wp_prepare_themes_for_js( $themes = null ) {
 			'name'         => $theme->display( 'Name' ),
 			'screenshot'   => array( $theme->get_screenshot() ), // @todo multiple
 			'description'  => $theme->display( 'Description' ),
-			'author'       => $theme->display( 'Author' ),
+			'author'       => $theme->display( 'Author', false, true ),
+			'authorAndUri' => $theme->display( 'Author' ),
 			'version'      => $theme->display( 'Version' ),
 			'tags'         => $theme->display( 'Tags' ),
 			'parent'       => $parent,
