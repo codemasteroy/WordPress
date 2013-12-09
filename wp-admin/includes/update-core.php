@@ -567,6 +567,33 @@ $_old_files = array(
 'wp-includes/js/tinymce/themes/advanced/skins/wp_theme/img/page_bug.gif',
 'wp-includes/js/thickbox/tb-close.png',
 'wp-includes/js/thickbox/tb-close-2x.png',
+'wp-admin/images/arrows-dark-2x.png',
+'wp-admin/images/arrows-dark-vs-2x.png',
+'wp-admin/images/arrows-dark-vs.png',
+'wp-admin/images/arrows-dark.png',
+'wp-admin/images/arrows-pr-2x.png',
+'wp-admin/images/arrows-pr.png',
+'wp-admin/images/arrows-vs-2x.png',
+'wp-admin/images/arrows-vs.png',
+'wp-admin/images/bubble_bg-rtl-2x.gif',
+'wp-admin/images/bubble_bg-rtl.gif',
+'wp-admin/images/menu-shadow-rtl.png',
+'wp-admin/images/menu-shadow.png',
+'wp-admin/images/press-this-2x.png',
+'wp-admin/images/press-this.png',
+'wp-admin/images/stars-rtl-2x.png',
+'wp-admin/images/stars-rtl.png',
+'wp-admin/images/welcome-icons-2x.png',
+'wp-admin/images/welcome-icons.png',
+'wp-admin/images/wordpress-logo-2x.png',
+'wp-admin/images/wp-badge-2x.png',
+'wp-admin/images/wp-badge.png',
+'wp-admin/images/wp-logo-2x.png',
+'wp-admin/images/wp-logo-vs-2x.png',
+'wp-admin/images/wp-logo-vs.png',
+'wp-admin/images/wp-logo.png',
+'wp-includes/images/wpmini-blue-2x.png',
+'wp-includes/images/wpmini-blue.png',
 );
 
 /**
@@ -894,6 +921,8 @@ function update_core($from, $to) {
 
 	// Clear the cache to prevent an update_option() from saving a stale db_version to the cache
 	wp_cache_flush();
+	// (Not all cache backends listen to 'flush')
+	wp_cache_delete( 'alloptions', 'options' );
 
 	// Remove working directory
 	$wp_filesystem->delete($from, true);

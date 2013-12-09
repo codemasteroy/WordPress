@@ -311,7 +311,7 @@ function wp_network_dashboard_right_now() {
  *
  * @since 3.8.0
  *
- * @param string $error_msg Error message.
+ * @param string $error_msg Optional. Error message. Default false.
  */
 function wp_dashboard_quick_press( $error_msg = false ) {
 	global $post_ID;
@@ -344,12 +344,12 @@ function wp_dashboard_quick_press( $error_msg = false ) {
 		<?php endif; ?>
 
 		<div class="input-text-wrap" id="title-wrap">
-			<label class="screen-reader-text prompt" for="title" id="title-prompt-text"><?php _e( 'What&#8217;s on your mind?' ); ?></label>
+			<label class="screen-reader-text prompt" for="title" id="title-prompt-text"><?php echo apply_filters( 'enter_title_here', __( 'Title' ), $post ); ?></label>
 			<input type="text" name="post_title" id="title" autocomplete="off" />
 		</div>
 
 		<div class="textarea-wrap" id="description-wrap">
-			<label class="screen-reader-text prompt" for="content" id="content-prompt-text"><?php _e( 'Enter a description' ); ?></label>
+			<label class="screen-reader-text prompt" for="content" id="content-prompt-text"><?php _e( 'What&#8217;s on your mind?' ); ?></label>
 			<textarea name="content" id="content" class="mceEditor" rows="3" cols="15"></textarea>
 		</div>
 
@@ -545,7 +545,17 @@ function wp_dashboard_site_activity() {
  *
  * @since 3.8.0
  *
- * @param array $args
+ * @param array $args {
+ *     An array of query and display arguments.
+ *
+ *     @type int    $display Number of posts to display.
+ *     @type int    $max     Maximum number of posts to query.
+ *     @type string $status  Post status.
+ *     @type string $order   Designates ascending ('ASC') or descending ('DESC') order.
+ *     @type string $title   Section title.
+ *     @type string $id      The container id.
+ * }
+ * @return bool False if no posts were found. True otherwise.
  */
 function wp_dashboard_recent_posts( $args ) {
 	$query_args = array(
@@ -584,6 +594,7 @@ function wp_dashboard_recent_posts( $args ) {
 			} elseif ( date( 'Y-m-d', $time ) == $tomorrow ) {
 				$relative = __( 'Tomorrow' );
 			} else {
+				/* translators: date and time format for recent posts on the dashboard, see http://php.net/date */
 				$relative = date_i18n( __( 'M jS' ), $time );
 			}
 
@@ -596,7 +607,8 @@ function wp_dashboard_recent_posts( $args ) {
   				_draft_or_post_title()
   			);
 
- 			$hidden = $i > $args['display'] ? ' class="hidden"' : '';
+ 			$hidden = $i >= $args['display'] ? ' class="hidden"' : '';
+ 			echo "<li{$hidden}>$text</li>";
 			$i++;
 		}
 
@@ -617,7 +629,8 @@ function wp_dashboard_recent_posts( $args ) {
  *
  * @since 3.8.0
  *
- * @param int $total_items
+ * @param int $total_items Optional. Number of comments to query. Default 5.
+ * @return bool False if no comments were found. True otherwise.
  */
 function wp_dashboard_recent_comments( $total_items = 5 ) {
 	global $wpdb;
@@ -843,6 +856,9 @@ function wp_dashboard_primary() {
  * Display the WordPress news feeds.
  *
  * @since 3.8.0
+ *
+ * @param string $widget_id Widget ID.
+ * @param array  $feeds     Array of RSS feeds.
  */
 function wp_dashboard_primary_output( $widget_id, $feeds ) {
 	foreach( $feeds as $type => $args ) {

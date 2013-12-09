@@ -13,15 +13,18 @@ $title = __( 'About' );
 
 list( $display_version ) = explode( '-', $wp_version );
 
-wp_enqueue_script( 'about' );
+// Temporary 3.8 hack: We want to use user-profile for the color schemes but don't need the heavy zxcvbn.
+wp_deregister_script( 'zxcvbn-async' );
+wp_register_script( 'zxcvbn-async', true );
+wp_enqueue_script( 'user-profile' );
 
 include( ABSPATH . 'wp-admin/admin-header.php' );
 ?>
 <div class="wrap about-wrap">
 
-<h1><?php printf( __( 'Welcome to WordPress %s' ), $display_version ); ?></h1>
+<h1><?php printf( __( 'Welcome to WordPress&nbsp;%s' ), $display_version ); ?></h1>
 
-<div class="about-text"><?php printf( __( 'Thank you for updating to WordPress 3.8! We&rsquo;re happy to bring you the most beautiful WordPress yet.' ), $display_version ); ?></div>
+<div class="about-text"><?php printf( __( 'Thank you for updating to WordPress %s, the most beautiful WordPress&nbsp;yet.' ), $display_version ); ?></div>
 
 <div class="wp-badge"><?php printf( __( 'Version %s' ), $display_version ); ?></div>
 
@@ -36,115 +39,102 @@ include( ABSPATH . 'wp-admin/admin-header.php' );
 </h2>
 
 <div class="changelog">
-	<h2><?php _e( 'Introducing a new, modern admin design' ); ?></h2>
-	<img src="<?php echo admin_url( 'images/about-overview.png' ); ?>" />
-
+	<h2 class="about-headline-callout"><?php echo ( 'Introducing a modern new&nbsp;design' ); ?></h2>
+	<img class="about-overview-img" src="<?php echo admin_url( 'images/about-overview.png' ); ?>" />
 	<div class="feature-section col three-col about-updates">
 		<div class="col-1">
-			<p style="margin-top: 20px; background-color: grey; padding: 1em; color: white; min-height: 150px;">Image</p>
-			<h3><?php _e( 'Modern aesthetics' ); ?></h3>
-			<p><?php _e( 'Goodbye decoration, hello simplicity. We removed extraneous details, focusing on a cleaner, more streamlined admin design.' ); ?></p>
+			<img src="images/about-modern-aesthetics.png" />
+			<h3><?php echo ( 'Modern aesthetic' ); ?></h3>
+			<p><?php echo ( 'The new admin has a fresh, uncluttered design that puts clarity and simplicity ahead of visual flourishes.' ); ?></p>
 		</div>
 		<div class="col-2">
-			<p style="margin-top: 20px; background-color: grey; padding: 1em; color: white; min-height: 150px;">Image</p>
-			<h3><?php _e( 'Improved typography' ); ?></h3>
-			<p><?php _e( 'You might notice the type is a little bit bigger. We improved the typography, crafting a better reading experience.' ); ?></p>
+			<img src="images/about-typography.png" />
+			<h3><?php echo ( 'Clean typography' ); ?></h3>
+			<p><?php echo ( 'Open Sans is Open Source. Our new typography is simple, friendly, and optimized for web and mobile interfaces.' ); ?></p>
 		</div>
 		<div class="col-3 last-feature">
-			<p style="margin-top: 20px; background-color: grey; padding: 1em; color: white; min-height: 150px;">Image</p>
-			<h3><?php _e( 'Higher contrast' ); ?></h3>
-			<p><?php _e( 'With bigger typography and both high and low contrast color schemes, our new admin design is great for users of all ages.' ); ?></p>
+			<img src="images/about-contrast.png" />
+			<h3><?php echo ( 'Refined contrast' ); ?></h3>
+			<p><?php echo ( 'What good is beautiful design if you can&#8217;t see it? Improved contrast gives you a better reading experience.' ); ?></p>
 		</div>
 	</div>
 </div>
 
-<hr />
-
-<!-- Image example -->
-<!-- <img alt="" src="<?php echo admin_url( 'images/about-search-2x.png' ); ?>" /> --> 
+<hr>
 
 <div class="changelog">
 	<div class="feature-section col two-col">
 		<div>
-			<h3><?php _e( 'Take WordPress with you anywhere with our responsive design' ); ?></h3>
-			<p><?php _e( 'The WordPress admin is now completely responsive: you can work on your website easily from your smartphone or tablet. The full power of WordPress is at your fingertips, even when you’re on the go.' ); ?></p>
-			<h4><?php _e( 'Naturally HiDPI' ); ?></h4>
-			<p><?php _e( 'No more blurry edges — with the inclusion of vector icons and graphics, the admin is now entirely HiDPI, so you get the best viewing experience no matter what kind of computer or mobile device you use.' ); ?></p>
+			<h3><?php echo ( 'WordPress on every&nbsp;device' ); ?></h3>
+			<p><?php echo ( 'Whether you&#8217;re on your smartphone or tablet, your notebook or desktop, WordPress looks great on every device. Now you can update your website wherever you are.' ); ?></p>
+			<h4><?php echo ( 'High definition is here' ); ?></h4>
+			<p><?php echo ( 'WordPress is sharper than ever; vector icons mean no more blurry edges. You get the best viewing experience no matter what type of device you use.' ); ?></p>
 		</div>
-		<div class="last-feature">
+		<div class="last-feature about-colors-img">
 			<img src="<?php echo admin_url( 'images/about-colors.png' ); ?>" />
 		</div>
 	</div>
 </div>
 
-<hr />
+<hr>
 
+<?php
+global $_wp_admin_css_colors;
+$new_colors = array( 'fresh', 'light', 'blue', 'midnight', 'sunrise', 'ectoplasm', 'ocean', 'coffee' );
+$_wp_admin_css_colors = array_intersect_key( $_wp_admin_css_colors, array_fill_keys( $new_colors, true ) );
+
+if ( count( $_wp_admin_css_colors ) > 1 && has_action( 'admin_color_scheme_picker' ) ) : ?>
 <div class="changelog about-colors">
 	<div class="feature-section col one-col">
 		<div>
-			<h3>Now with more color</h3>
-			<p><?php _e( 'Your admin is not longer monochromatic — we&rsquo;ve brought some more color to keep it looking fresh. You now have the option of four different default color schemes.' ); ?></p>
-			<p><?php _e( 'Try them out below:' ); ?></p>
-			<img src="https://i.cloudup.com/NBlGusRk0H.png" style="border: 2px solid red; max-width: 99%; margin: 0;" />
-			<p><?php _e( 'You can change your color scheme at any time from your profile page.' ); ?></p>
+			<h3><?php echo ( 'Pick a color' ); ?></h3>
+			<p><?php echo ( 'We&#8217;ve included eight color schemes so you can pick your favorite. Choose from any of them below to change it in an instant.' ); ?>
+				<?php
+				/** This action is documented in wp-admin/user-edit.php */
+				do_action( 'admin_color_scheme_picker' );
+				?>
+			<p><?php printf( ( 'To change your color scheme later, just <a href="%1$s">visit your profile</a>.' ), get_edit_profile_url( get_current_user_id() ) ); ?></p>
 		</div>
 	</div>
 </div>
 
-<hr />
+<hr>
+<?php endif; ?>
 
 <div class="changelog">
 	<div class="feature-section col two-col">
 		<div>
-			<h3><?php _e( 'A new theme experience' ); ?></h3>
-			<p><?php _e( 'A sleeker, faster, and more visual organization of your themes that is responsive.' ); ?></p>
-			<h4><?php _e( 'Browse better' ); ?></h4>
-			<p><?php _e( 'Enjoy a focused experience with theme screenshots at the center. Quickly search through your themes or add new ones.' ); ?></p>
-			<h4><?php _e( 'Dive into the details' ); ?></h4>
-			<p><?php _e( 'Expand a theme to see more information and preview it. Use the arrow navigation to quickly swift through your themes.' ); ?></p>
-			<h4><?php _e( 'Easier updates' ); ?></h4>
-			<p><?php _e( 'Identify immediately when a theme update is available.' ); ?></p>				
+			<h3><?php echo ( 'A new theme experience' ); ?></h3>
+			<p><?php echo ( 'Finding and installing the right theme has never been easier.' ); ?></p>
+			<h4><?php echo ( 'Better browsing' ); ?></h4>
+			<p><?php echo ( 'Focus is placed on what&#8217;s important &mdash; your theme&#8217;s design. Search through your themes at a glance and add new ones with a click.' ); ?></p>
+			<h4><?php echo ( 'Dive into the details' ); ?></h4>
+			<p><?php echo ( 'If you need information about any of your themes, just click to discover more. Sit back and use your keyboard&#8217;s navigation arrows to flip through every theme you&#8217;ve got.' ); ?></p>
+			<h4><?php echo ( 'Stay updated' ); ?></h4>
+			<p><?php echo ( 'You can tell in an instant if a theme needs updated, and like so many things in WordPress, updating it takes just a second.' ); ?></p>
 		</div>
-		<div class="last-feature">
+		<div class="last-feature about-themes-img">
 			<img src="<?php echo admin_url( 'images/about-themes.png' ); ?>" />
 		</div>
 	</div>
 </div>
 
-<hr />
+<hr>
 
-<div class="changelog">
-	<h2><?php _e( 'Sleek New Magazine Theme' ); ?></h2>
-	<img src="<?php echo admin_url( 'images/about-twentyfourteen.png' ); ?>" />
+<div class="changelog about-twentyfourteen">
+	<h2 class="about-headline-callout"><?php echo ( 'Twenty Fourteen, a sleek new magazine&nbsp;theme' ); ?></h2>
+	<img src="<?php echo admin_url( 'images/about-twentyfourteen.jpg' ); ?>" />
 
-	<div class="feature-section col one-col">
+	<div class="feature-section col one-col center-col">
 		<div>
-			<h3><?php _e( 'Our new default theme lets you create a responsive magazine website with an elegant, modern design.' ); ?></h3>
-			<p><?php _e( 'Feature your favorite homepage content in either a grid or a slider. Use the three widget areas to customize your website, and change your content&rsquo;s layout with a full width page template and a contributor page to show of your authors.' ); ?></p>
-			<p><?php _e( 'Creating a magazine website with WordPress has never been easier.' ); ?></p>
+			<h3><?php echo ( 'Turn your blog into a&nbsp;magazine' ); ?></h3>
+			<p><?php echo ( 'With a striking design that does not compromise on our trademark simplicity, Twenty Fourteen is our boldest default theme. Choose a grid or a slider to display featured content on your homepage. Customize your homepage with three widget areas or change your layout with two page templates.' ); ?></p>
+			<p><?php echo ( 'Creating a magazine website with WordPress has never been easier.' ); ?></p>
 		</div>
 	</div>
 </div>
 
-<hr />
-
-<div class="changelog">
-	<h3><?php _e( 'Under the Hood' ); ?></h3>
-
-	<div class="feature-section col three-col">
-		<div>
-			<h4><?php _e( 'Meta query fixes' ); ?></h4>
-			<p><?php _e( 'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Vestibulum id ligula porta felis.' ); ?></p>
-		</div>
-		<div>
-			<h4><?php _e( 'Automated RTL styles' ); ?></h4>
-			<p><?php _e( 'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Vestibulum id ligula porta felis.' ); ?></p>
-		</div>
-		<div class="last-feature">
-			<h4><?php _e( 'Improved customizer' ); ?></h4>
-			<p><?php _e( 'Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Vestibulum id ligula porta felis.' ); ?></p>
-		</div>
-</div>
+<hr>
 
 <div class="return-to-dashboard">
 	<?php if ( current_user_can( 'update_core' ) && isset( $_GET['updated'] ) ) : ?>
