@@ -808,7 +808,7 @@ function delete_plugins($plugins, $redirect = '' ) {
 	if ( $current = get_site_transient('update_plugins') ) {
 		// Don't remove the plugins that weren't deleted.
 		$deleted = array_diff( $plugins, $errors );
-		
+
 		foreach ( $deleted as $plugin_file ) {
 			unset( $current->response[ $plugin_file ] );
 		}
@@ -1412,7 +1412,7 @@ function remove_submenu_page( $menu_slug, $submenu_slug ) {
  *
  * If the slug hasn't been registered properly no url will be returned
  *
- * @since 3.0
+ * @since 3.0.0
  *
  * @param string $menu_slug The slug name to refer to this menu by (should be unique for this menu)
  * @param bool $echo Whether or not to echo the url - default is true

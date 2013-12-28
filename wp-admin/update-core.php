@@ -133,7 +133,7 @@ function dismissed_updates() {
 /**
  * Display upgrade WordPress for downloading latest or upgrading automatically form.
  *
- * @since 2.7
+ * @since 2.7.0
  *
  * @return null
  */
@@ -353,7 +353,7 @@ function list_translation_updates() {
 /**
  * Upgrade WordPress core display.
  *
- * @since 2.7
+ * @since 2.7.0
  *
  * @return null
  */
@@ -490,7 +490,7 @@ get_current_screen()->set_help_sidebar(
 if ( 'upgrade-core' == $action ) {
 	// Force a update check when requested
 	$force_check = ! empty( $_GET['force-check'] );
-	wp_version_check( array(), $force_check ); 
+	wp_version_check( array(), $force_check );
 
 	require_once(ABSPATH . 'wp-admin/admin-header.php');
 	?>
