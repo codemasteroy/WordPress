@@ -66,7 +66,7 @@ if ( isset( $_GET['action'] ) ) {
 		<html xmlns="http://www.w3.org/1999/xhtml" <?php language_attributes(); ?>>
 			<head>
 				<meta name="viewport" content="width=device-width" />
-				<title><?php _e( 'WordPress &rsaquo; Confirm your action' ); ?></title>
+				<title><?php echo get_site_option( 'site_name', __('WordPress') ) . __( ' &rsaquo; Confirm your action' ); ?></title>
 
 				<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 				<?php
@@ -75,7 +75,7 @@ if ( isset( $_GET['action'] ) ) {
 				?>
 			</head>
 			<body class="wp-core-ui">
-				<h1 id="logo"><a href="<?php echo esc_url( __( 'http://wordpress.org/' ) ); ?>"><?php _e( 'WordPress' ); ?></a></h1>
+				<h1 id="logo"><a href="<?php echo esc_url( network_site_url() ); ?>"><?php echo get_site_option( 'site_name', __('WordPress') ); ?></a></h1>
 				<form action="sites.php?action=<?php echo esc_attr( $_GET['action2'] ) ?>" method="post">
 					<input type="hidden" name="action" value="<?php echo esc_attr( $_GET['action2'] ) ?>" />
 					<input type="hidden" name="id" value="<?php echo esc_attr( $id ); ?>" />
