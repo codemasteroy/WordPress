@@ -1808,7 +1808,7 @@ function wp_no_robots() {
 function rich_edit_exists() {
 	global $wp_rich_edit_exists;
 	if ( !isset($wp_rich_edit_exists) )
-		$wp_rich_edit_exists = file_exists(ABSPATH . WPINC . '/js/tinymce/tinymce.js');
+		$wp_rich_edit_exists = file_exists(ABSPATH . WPINC . '/js/tinymce/tiny_mce.js');
 	return $wp_rich_edit_exists;
 }
 
