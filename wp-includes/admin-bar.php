@@ -301,7 +301,7 @@ function wp_admin_bar_site_menu( $wp_admin_bar ) {
 			'href'   => home_url( '/' ),
 		) );
 
-		if ( is_blog_admin() && is_multisite() && current_user_can( 'manage_sites' ) ) {
+		if ( is_blog_admin() && is_multisite() && current_user_can( 'manage_sites' ) && current_user_can( 'edit_sites' ) ) {
 			$wp_admin_bar->add_menu( array(
 				'parent' => 'site-name',
 				'id'     => 'edit-site',
