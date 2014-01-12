@@ -400,7 +400,13 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		),
 	) );
 
+	$_my_blog_count = 0;
+	
 	foreach ( (array) $wp_admin_bar->user->blogs as $blog ) {
+		
+		if ($_my_blog_count == 14)
+			break;
+
 		switch_to_blog( $blog->userblog_id );
 
 		$blavatar = '<div class="blavatar"></div>';
@@ -448,6 +454,8 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		) );
 
 		restore_current_blog();
+
+		$_my_blog_count++;
 	}
 }
 
