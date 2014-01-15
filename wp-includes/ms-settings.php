@@ -36,8 +36,8 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 		}
 	}
 
-	$domain = strtolower( $domain );
 	$domain = rtrim( $domain, '.' );
+	$domain = strtolower( $domain );
 	$cookie_domain = $domain;
 	if ( substr( $cookie_domain, 0, 4 ) == 'www.' )
 		$cookie_domain = substr( $cookie_domain, 4 );
@@ -100,6 +100,13 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 		header( 'Location: ' . $destination );
 		die();
 	}
+
+	// wrong case
+	if ( $domain != $current_blog->domain || $path != $current_blog->path )  {
+		header( "HTTP/1.1 301 Moved Permanently" );
+        header( 'Location: ' . "http://{$current_blog->domain}{$current_blog->path}" );
+        die();
+    }
 
 	if ( ! defined( 'WP_INSTALLING' ) ) {
 		if ( $current_site && ! $current_blog ) {
