@@ -102,7 +102,7 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 	}
 
 	// wrong case
-	if ( $domain != $current_blog->domain || $path != $current_blog->path )  {
+	if ( is_object( $current_blog ) && !empty( $current_blog->domain ) && !empty( $current_blog->path ) && $domain != $current_blog->domain || $path != $current_blog->path )  {
 		header( "HTTP/1.1 301 Moved Permanently" );
         header( 'Location: ' . "http://{$current_blog->domain}{$current_blog->path}" );
         die();
