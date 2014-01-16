@@ -73,8 +73,43 @@ else :
 	 * @since 3.0.0
 	 */
 	do_action( 'myblogs_allblogs_options' );
+
+?>
+	<input type="hidden" name="action" value="updateblogsettings" />
+	<?php wp_nonce_field( 'update-my-sites' ); ?>
+	<?php submit_button(); ?>
+</form>
+<form id="myblogs" action="" method="post">
+<div class="tablenav">
+<?php
+	// Pagination start
+	$per_page = 10;
+	$total_blogs = count( $blogs );
+
+	$current_page = ( isset( $_GET['paged'] ) && intval( $_GET['paged'] ) > 0 ) ? intval( $_GET['paged'] ) : 1;
+	$page_start = ( ( $current_page - 1 ) * $per_page );
+	$oblogs = $blogs;
+
+	$blogs = array_slice( $blogs, $page_start, $per_page );
+	// Pagination end
+
+	$page_links = paginate_links( array(
+		'base' => add_query_arg( 'paged', '%#%' ),
+		'format' => '',
+		'prev_text' => __('&laquo;'),
+		'next_text' => __('&raquo;'),
+		'total' => ceil($total_blogs / $per_page),
+		'current' => $current_page
+	));
+
+	if ( $page_links )
+		echo "<div class='tablenav-pages'>$page_links</div>";
+
+	do_action( 'myblogs_bulk_actions' );
+
 	?>
 	<br clear="all" />
+</div>
 	<table class="widefat fixed">
 	<?php
 	/**
@@ -135,10 +170,15 @@ else :
 		echo "</tr>";
 	}?>
 	</table>
+	<div class="tablenav">
+	<?php
+	if ( $page_links )
+		echo "<div class='tablenav-pages'>$page_links</div>";
+	?>
+	</div>
 	<input type="hidden" name="action" value="updateblogsettings" />
 	<?php wp_nonce_field( 'update-my-sites' ); ?>
-	<?php submit_button(); ?>
-	</form>
+</form>
 <?php endif; ?>
 	</div>
 <?php
