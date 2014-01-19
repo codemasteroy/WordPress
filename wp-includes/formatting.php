@@ -1742,7 +1742,7 @@ function make_clickable( $text ) {
 	}
 
 	// Cleanup of accidental links within links
-	$r = preg_replace( '#(<a( [^>]+?>|>))<a [^>]+?>([^>]+?)</a></a>#i', "$1$3</a>", $r );
+	$r = preg_replace( '#(<a([ \r\n\t]+[^>]+?>|>))<a [^>]+?>([^>]+?)</a></a>#i', "$1$3</a>", $r );
 	return $r;
 }
 
@@ -3770,11 +3770,13 @@ function wp_unslash( $value ) {
  * @return string The found URL.
  */
 function get_url_in_content( $content ) {
-	if ( empty( $content ) )
-		return '';
+	if ( empty( $content ) ) {
+		return false;
+	}
 
-	if ( preg_match( '/<a\s[^>]*?href=([\'"])(.+?)\1/is', $content, $matches ) )
+	if ( preg_match( '/<a\s[^>]*?href=([\'"])(.+?)\1/is', $content, $matches ) ) {
 		return esc_url_raw( $matches[2] );
+	}
 
 	return false;
 }

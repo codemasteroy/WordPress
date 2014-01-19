@@ -331,6 +331,15 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		});
 	});
 
+	editor.on( 'ObjectResized', function( event ) {
+        var parent,
+			node = event.target;
+
+		if ( node.nodeName === 'IMG' && ( parent = editor.dom.getParent( node, '.wp-caption' ) ) ) {
+			editor.dom.setStyle( parent, 'width', 10 + event.width + 'px' );
+		}
+    });
+
 	editor.on( 'BeforeExecCommand', function( e ) {
 		var node, p, DL, align,
 			cmd = e.command,
@@ -355,7 +364,6 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				}
 			}
 		} else if ( cmd === 'JustifyLeft' || cmd === 'JustifyRight' || cmd === 'JustifyCenter' ) {
-			// When inside an image caption, set the align* class on dt.wp-caption
 			node = editor.selection.getNode();
 			align = cmd.substr(7).toLowerCase();
 			align = 'align' + align;
@@ -367,6 +375,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			}
 
 			if ( DL ) {
+				// When inside an image caption, set the align* class on dl.wp-caption
 				if ( dom.hasClass( DL, align ) ) {
 					dom.removeClass( DL, align );
 					dom.addClass( DL, 'alignnone' );
@@ -376,6 +385,15 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 				}
 
 				return false;
+			}
+
+			if ( node.nodeName === 'IMG' ) {
+				if ( dom.hasClass( node, align ) ) {
+					// The align class is being removed
+					dom.addClass( node, 'alignnone' );
+				} else {
+					dom.removeClass( node, 'alignnone' );
+				}
 			}
 		}
 	});

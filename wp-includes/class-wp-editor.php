@@ -237,6 +237,12 @@ final class _WP_Editors {
 						'wpdialogs',
 					) ) );
 
+					if ( ( $key = array_search( 'spellchecker', $plugins ) ) !== false ) {
+						// Remove 'spellchecker' from the internal plugins if added with 'tiny_mce_plugins' filter to prevent errors.
+						// It can be added with 'mce_external_plugins'.
+						unset( $plugins[$key] );
+					}
+
 					if ( ! empty( $mce_external_plugins ) ) {
 						/**
 						 * This filter loads translations for external TinyMCE 3.x plugins.
@@ -312,7 +318,6 @@ final class _WP_Editors {
 					'entities' => '38,amp,60,lt,62,gt',
 					'entity_encoding' => 'raw',
 					'menubar' => false,
-					'object_resizing' => false,
 					'keep_styles' => false,
 					'paste_remove_styles' => true,
 
@@ -325,11 +330,6 @@ final class _WP_Editors {
 
 				if ( ! empty( $mce_external_plugins ) ) {
 					self::$first_init['external_plugins'] = json_encode( $mce_external_plugins );
-				}
-
-				if ( in_array( 'spellchecker', $plugins, true ) ) {
-					self::$first_init['spellchecker_rpc_url'] = self::$baseurl . '/plugins/spellchecker/rpc.php';
-					self::$first_init['spellchecker_language'] = self::$mce_locale;
 				}
 
 				// WordPress default stylesheet
@@ -445,6 +445,12 @@ final class _WP_Editors {
 			if ( empty( $mceInit['toolbar3'] ) && ! empty( $mceInit['toolbar4'] ) ) {
 				$mceInit['toolbar3'] = $mceInit['toolbar4'];
 				$mceInit['toolbar4'] = '';
+			}
+
+			// Fix 3.x callbacks added with init.setup
+			if ( ! empty( $mceInit['setup'] ) ) {
+				$func = $mceInit['setup'];
+				$mceInit['setup'] = "function( editor ) { editor.on( 'PreInit', function(){ ($func).call( this, editor ); }); }";
 			}
 
 			self::$mce_settings[$editor_id] = $mceInit;

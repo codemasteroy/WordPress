@@ -3412,3 +3412,4 @@ function rich_edit_exists() {
 
 	return $wp_rich_edit_exists;
 }
+
