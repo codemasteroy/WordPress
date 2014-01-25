@@ -691,7 +691,7 @@ final class _WP_Editors {
 
 		foreach ( $mce_translation as $key => $value ) {
 			if ( strpos( $value, '&' ) !== false )
-				$mce_translation[$key] = html_entity_decode( $value, ENT_QUOTES );
+				$mce_translation[$key] = html_entity_decode( $value, ENT_QUOTES, 'UTF-8' );
 		}
 
 		return "tinymce.addI18n( '$mce_locale', " . json_encode( $mce_translation ) . ");\n" .
@@ -796,7 +796,7 @@ final class _WP_Editors {
 		?>
 
 		( function() {
-			var init, edId, qtId, firstInit,
+			var init, edId, qtId, firstInit, override,
 				loadMCE = typeof getUserSetting !== 'undefined' ? getUserSetting( 'editor' ) === 'tinymce' : true;
 
 			if ( typeof quicktags !== 'undefined' ) {
@@ -813,7 +813,10 @@ final class _WP_Editors {
 						init = firstInit = tinyMCEPreInit.mceInit[edId];
 					}
 
-					if ( ( loadMCE || ! tinyMCEPreInit.qtInit.hasOwnProperty( edId ) ) && ! init.wp_skip_init ) {
+					override = tinymce.DOM.hasClass( tinymce.DOM.select( '#wp-' + edId + '-wrap' )[0], 'tmce-active' );
+					override = override || ! tinyMCEPreInit.qtInit.hasOwnProperty( edId );
+
+					if ( ( loadMCE || override ) && ! init.wp_skip_init ) {
 						try { tinymce.init( init ); } catch(e){}
 					}
 				}
