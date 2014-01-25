@@ -750,6 +750,18 @@ select,
 	padding-right: 6px;
 }
 
+.upgrade .plugins td,
+.upgrade .plugins th {
+	-webkit-box-shadow: inset 0 -1px 0 rgba(0,0,0,0.1);
+	box-shadow:         inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+
+.upgrade .plugins tr:last-of-type td,
+.upgrade .plugins tr:last-of-type th {
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
 #update-plugins-table thead th.check-column,
 #update-plugins-table tfoot th.check-column {
 	padding-top: 11px;
@@ -2965,7 +2977,8 @@ body #dashboard-widgets .postbox form .submit {
 
 /* Dashboard right now - Colors */
 
-#dashboard_right_now li a:before {
+#dashboard_right_now li a:before,
+#dashboard_right_now li span:before {
 	color: #888;
 }
 
@@ -2984,12 +2997,14 @@ body #dashboard-widgets .postbox form .submit {
 	margin: 0 0 1em;
 }
 
-#dashboard_right_now .warning a:before {
+#dashboard_right_now .warning a:before,
+#dashboard_right_now .warning span:before {
 	color: #d54e21;
 }
 
 /* Dashboard right now - Icons */
-#dashboard_right_now li a:before {
+#dashboard_right_now li a:before,
+#dashboard_right_now li span:before {
 	content: '\f159';
 	font: normal 20px/1 'dashicons';
 	speak: none;
@@ -3004,11 +3019,13 @@ body #dashboard-widgets .postbox form .submit {
 	text-decoration: none !important;
 }
 
-#dashboard_right_now .page-count a:before {
+#dashboard_right_now .page-count a:before,
+#dashboard_right_now .page-count span:before {
 	content: '\f105';
 }
 
-#dashboard_right_now .post-count a:before {
+#dashboard_right_now .post-count a:before,
+#dashboard_right_now .post-count span:before {
 	content: '\f109';
 }
 
@@ -6391,6 +6408,11 @@ span.imgedit-scale-warn {
 	box-sizing:         border-box;
 }
 
+.ie8 .theme-browser .theme {
+	width: 30%;
+	margin: 0 0 4% 3%;
+}
+
 .theme-browser .theme:nth-child(3n) {
 	margin-left: 0;
 }
@@ -6416,6 +6438,7 @@ span.imgedit-scale-warn {
 
 /* Activate and Customize buttons, shown on hover */
 .theme-browser .theme .theme-actions {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
 	opacity: 0;
 	-webkit-transition: opacity 0.1s ease-in-out;
 	transition:         opacity 0.1s ease-in-out;
@@ -6429,6 +6452,7 @@ span.imgedit-scale-warn {
 }
 
 .theme-browser .theme:hover .theme-actions {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
 	opacity: 1;
 }
 
@@ -6481,11 +6505,13 @@ span.imgedit-scale-warn {
 }
 
 .theme-browser .theme .more-details {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
 	opacity: 0;
 	position: absolute;
 		top: 35%;
 		left: 25%;
 		right: 25%;
+	background: #222;
 	background: rgba(0,0,0,0.7);
 	color: #fff;
 	font-size: 15px;
@@ -6518,6 +6544,7 @@ span.imgedit-scale-warn {
 }
 
 .theme-browser.rendered .theme:hover .more-details {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
 	opacity: 1;
 }
 
@@ -6621,7 +6648,9 @@ span.imgedit-scale-warn {
 .theme-browser .theme.add-new-theme:after {
 	display: block;
 	content: '';
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
 	opacity: 1;
+	background: transparent;
 	background: rgba(0, 0, 0, 0);
 	position: absolute;
 	top: 0;
@@ -6630,6 +6659,7 @@ span.imgedit-scale-warn {
 	bottom: 0;
 	padding: 10% 0 0 0;
 	text-shadow: none;
+	border: 5px dashed #d5d2ca;
 	border: 5px dashed rgba(0, 0, 0, 0.1);
 	-webkit-transition: opacity 0.2s ease-in-out;
 	transition:         opacity 0.2s ease-in-out;
@@ -6639,6 +6669,7 @@ span.imgedit-scale-warn {
 }
 
 .theme-browser .theme.add-new-theme span:after {
+	background: #e5e5e5;
 	background: rgba(153, 153, 153, 0.1);
 	border-radius: 50%;
 	display: inline-block;
@@ -6677,6 +6708,7 @@ span.imgedit-scale-warn {
 	border-color: transparent;
 	color: #fff;
 	background: #0074a2;
+	content: '';
 }
 
 .theme-browser .theme.add-new-theme .theme-name {
@@ -6718,6 +6750,7 @@ span.imgedit-scale-warn {
 	left: 0;
 	top: 0;
 	bottom: 0;
+	background: #f1f1f1;
 	background: rgba( 238, 238, 238, 0.9 );
 	z-index: 10;
 }
@@ -6869,6 +6902,10 @@ body.folded .theme-overlay .theme-wrap {
 	z-index: 30;
 	box-sizing: border-box;
 	border-top: 1px solid #eee;
+}
+
+.ie8 .theme-overlay .theme-actions {
+	border: 1px solid #eee;
 }
 
 .theme-overlay .theme-actions a {
@@ -11826,19 +11863,13 @@ li#wp-admin-bar-menu-toggle {
 	.auto-fold #adminmenuback,
 	.auto-fold #adminmenuwrap {
 		position: absolute;
-		right: 0;
+		width: 190px;
 		z-index: 100;
 	}
 
 	.auto-fold #adminmenuback,
 	.auto-fold #adminmenuwrap {
-		right: -200px;
-	}
-
-	.auto-fold #adminmenuwrap,
-	.auto-fold #adminmenu,
-	.auto-fold #adminmenuback {
-		width: 190px;
+		display: none;
 	}
 
 	.auto-fold #adminmenu li.menu-top {
@@ -11944,7 +11975,7 @@ li#wp-admin-bar-menu-toggle {
 
 	.auto-fold .wp-responsive-open #adminmenuback,
 	.auto-fold .wp-responsive-open #adminmenuwrap {
-		right: 0;
+		display: block;
 	}
 
 	/* General New Post Form */
