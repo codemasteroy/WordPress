@@ -267,8 +267,13 @@ function signup_another_blog( $blogname = '', $blog_title = '', $errors = '' ) {
 
 	<?php
 	$blogs = get_blogs_of_user($current_user->ID);
-	if ( !empty($blogs) ) { ?>
-
+	if ( !empty($blogs) ) {
+		if ( count($blogs) > 5 ) {
+	?>
+			<p><?php echo sprintf(__( 'You are already a member of %d blogs.' ), count($blogs)); ?></p>
+	<?php
+		} else {
+	?>
 			<p><?php _e( 'Sites you are already a member of:' ) ?></p>
 			<ul>
 				<?php foreach ( $blogs as $blog ) {
@@ -276,6 +281,9 @@ function signup_another_blog( $blogname = '', $blog_title = '', $errors = '' ) {
 					echo '<li><a href="' . esc_url( $home_url ) . '">' . $home_url . '</a></li>';
 				} ?>
 			</ul>
+	<?php
+		}
+	?>
 	<?php } ?>
 
 	<p><?php _e( 'If you&#8217;re not going to use a great site domain, leave it for a new user. Now have at it!' ) ?></p>
