@@ -49,7 +49,7 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 
 	$current_site = wpmu_current_site();
 	if ( ! isset( $current_site->blog_id ) )
-		$current_site->blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND LOWER(path) = %s", $current_site->domain, strtolower( $current_site->path ) ) );
+		$current_site->blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s", $current_site->domain, strtolower( $current_site->path ) ) );
 
 	if ( is_subdomain_install() ) {
 		$current_blog = wp_cache_get( 'current_blog_' . $domain, 'site-options' );
@@ -61,7 +61,7 @@ if ( !isset( $current_site ) || !isset( $current_blog ) ) {
 		if ( $current_blog && $current_blog->site_id != $current_site->id ) {
 			$current_site = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $wpdb->site WHERE id = %d", $current_blog->site_id ) );
 			if ( ! isset( $current_site->blog_id ) )
-				$current_site->blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND LOWER(path) = %s", $current_site->domain, strtolower( $current_site->path ) ) );
+				$current_site->blog_id = $wpdb->get_var( $wpdb->prepare( "SELECT blog_id FROM $wpdb->blogs WHERE domain = %s AND path = %s", $current_site->domain, strtolower( $current_site->path ) ) );
 		} else
 			$blogname = substr( $domain, 0, strpos( $domain, '.' ) );
 	} else {
