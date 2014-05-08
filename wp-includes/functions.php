@@ -1774,6 +1774,7 @@ function wp_upload_bits( $name, $deprecated, $bits, $time = null ) {
 	}
 
 	$filename = wp_unique_filename( $upload['path'], $name );
+	$filename = apply_filters( 'wp_upload_bits_filename', $filename );
 
 	$new_file = $upload['path'] . "/$filename";
 	if ( ! wp_mkdir_p( dirname( $new_file ) ) ) {
