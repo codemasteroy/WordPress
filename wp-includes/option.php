@@ -59,14 +59,20 @@ function get_option( $option, $default = false ) {
 
 			if ( false === $value ) {
 				$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
+				
+				if ( in_array( $this->last_error_number, array( 2006, 2013 ) ) ) { // Server gone away, try again
+					$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
+				}
 
 				// Has to be get_row instead of get_var because of funkiness with 0, false, null values
 				if ( is_object( $row ) ) {
 					$value = $row->option_value;
 					wp_cache_add( $option, $value, 'options' );
 				} else { // option does not exist, so we must cache its non-existence
-					$notoptions[$option] = true;
-					wp_cache_set( 'notoptions', $notoptions, 'options' );
+					if ( ! in_array( $this->last_error_number, array( 2006, 2013 ) ) ) { // Server gone away, may be exists
+						$notoptions[$option] = true;
+						wp_cache_set( 'notoptions', $notoptions, 'options' );
+					}
 					return apply_filters( 'default_option_' . $option, $default );
 				}
 			}
@@ -74,6 +80,9 @@ function get_option( $option, $default = false ) {
 	} else {
 		$suppress = $wpdb->suppress_errors();
 		$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
+		if ( in_array( $this->last_error_number, array( 2006, 2013 ) ) ) { // Server gone away, try again
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT option_value FROM $wpdb->options WHERE option_name = %s LIMIT 1", $option ) );
+		}
 		$wpdb->suppress_errors( $suppress );
 		if ( is_object( $row ) )
 			$value = $row->option_value;

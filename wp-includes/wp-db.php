@@ -77,6 +77,14 @@ class wpdb {
 	var $last_error = '';
 
 	/**
+	 * The last error number during query.
+	 *
+	 * @since 3.5.2
+	 * @var string
+	 */
+	var $last_error_number = 0;
+
+	/**
 	 * Amount of queries made
 	 *
 	 * @since 1.2.0
@@ -1121,6 +1129,7 @@ class wpdb {
 		$this->last_query  = null;
 		$this->rows_affected = $this->num_rows = 0;
 		$this->last_error  = '';
+		$this->last_error_number = 0;
 
 		if ( is_resource( $this->result ) )
 			mysql_free_result( $this->result );
@@ -1218,11 +1227,19 @@ class wpdb {
 
 		// If there is an error then take note of it..
 		if ( $this->last_error = mysql_error( $this->dbh ) ) {
+			$this->last_error_number = mysql_errno( $this->dbh );
+
 			// Clear insert_id on a subsequent failed insert.
 			if ( $this->insert_id && preg_match( '/^\s*(insert|replace)\s/i', $query ) )
 				$this->insert_id = 0;
 
 			$this->print_error();
+
+			// MySQL server has gone away
+			if ( in_array( $this->last_error_number, array( 2006, 2013 ) ) ) {
+				error_log( "MySQL server has gone away. {$query}\n", 3, "/tmp/moha-mysql-server-gone.log" );
+			}
+
 			return false;
 		}
 
