@@ -1235,11 +1235,6 @@ class wpdb {
 
 			$this->print_error();
 
-			// MySQL server has gone away
-			if ( in_array( $this->last_error_number, array( 2006, 2013 ) ) ) {
-				error_log( "MySQL server has gone away. {$query}\n", 3, "/tmp/moha-mysql-server-gone.log" );
-			}
-
 			return false;
 		}
 
