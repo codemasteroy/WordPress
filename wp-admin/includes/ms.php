@@ -35,8 +35,9 @@ function check_upload_size( $file ) {
 	if ( upload_is_user_over_quota( false ) ) {
 		$file['error'] = __( 'You have used your space quota. Please delete files before uploading.' );
 	}
-	if ( $file['error'] != '0' && !isset($_POST['html-upload']) )
+	if ( $file['error'] != '0' && ! isset( $_POST['html-upload'] ) && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 		wp_die( $file['error'] . ' <a href="javascript:history.go(-1)">' . __( 'Back' ) . '</a>' );
+	}
 
 	return $file;
 }
@@ -84,11 +85,26 @@ function wpmu_delete_blog( $blog_id, $drop = false ) {
 
 	$current_site = get_current_site();
 
-	// Don't destroy the initial, main, or root blog.
-	if ( $drop && ( 1 == $blog_id || is_main_site( $blog_id ) || ( $blog->path == $current_site->path && $blog->domain == $current_site->domain ) ) )
+	// If a full blog object is not available, do not destroy anything.
+	if ( $drop && ! $blog ) {
 		$drop = false;
+	}
+
+	// Don't destroy the initial, main, or root blog.
+	if ( $drop && ( 1 == $blog_id || is_main_site( $blog_id ) || ( $blog->path == $current_site->path && $blog->domain == $current_site->domain ) ) ) {
+		$drop = false;
+	}
+
+	$upload_path = trim( get_option( 'upload_path' ) );
+
+	// If ms_files_rewriting is enabled and upload_path is empty, wp_upload_dir is not reliable.
+	if ( $drop && get_site_option( 'ms_files_rewriting' ) && empty( $upload_path ) ) {
+		$drop = false;
+	}
 
 	if ( $drop ) {
+		$uploads = wp_upload_dir();
+
 		$tables = $wpdb->tables( 'blog' );
 		/**
 		 * Filter the tables to drop when the blog is deleted.
@@ -106,7 +122,6 @@ function wpmu_delete_blog( $blog_id, $drop = false ) {
 
 		$wpdb->delete( $wpdb->blogs, array( 'blog_id' => $blog_id ) );
 
-		$uploads = wp_upload_dir();
 		/**
 		 * Filter the upload base directory to delete when the blog is deleted.
 		 *
@@ -211,7 +226,6 @@ function wpmu_delete_user( $id ) {
 }
 
 function update_option_new_admin_email( $old_value, $value ) {
-	$email = get_option( 'admin_email' );
 	if ( $value == get_option( 'admin_email' ) || !is_email( $value ) )
 		return;
 
@@ -259,7 +273,7 @@ All at ###SITENAME###
 	$content = str_replace( '###SITENAME###', get_site_option( 'site_name' ), $content );
 	$content = str_replace( '###SITEURL###', network_home_url(), $content );
 
-	wp_mail( $value, sprintf( __( '[%s] New Admin Email Address' ), get_option( 'blogname' ) ), $content );
+	wp_mail( $value, sprintf( __( '[%s] New Admin Email Address' ), wp_specialchars_decode( get_option( 'blogname' ) ) ), $content );
 }
 add_action( 'update_option_new_admin_email', 'update_option_new_admin_email', 10, 2 );
 add_action( 'add_option_new_admin_email', 'update_option_new_admin_email', 10, 2 );
@@ -328,7 +342,7 @@ All at ###SITENAME###
 		$content = str_replace( '###SITENAME###', get_site_option( 'site_name' ), $content );
 		$content = str_replace( '###SITEURL###', network_home_url(), $content );
 
-		wp_mail( $_POST['email'], sprintf( __( '[%s] New Email Address' ), get_option( 'blogname' ) ), $content );
+		wp_mail( $_POST['email'], sprintf( __( '[%s] New Email Address' ), wp_specialchars_decode( get_option( 'blogname' ) ) ), $content );
 		$_POST['email'] = $current_user->user_email;
 	}
 }
@@ -396,9 +410,6 @@ function display_space_usage() {
  * Get the remaining upload space for this blog.
  *
  * @since MU
- * @uses upload_is_user_over_quota()
- * @uses get_space_allowed()
- * @uses get_upload_space_available()
  *
  * @param int $size Current max size in bytes
  * @return int Max size in bytes
@@ -670,10 +681,10 @@ function choose_primary_blog() {
 		<tr>
 			<th scope="row" colspan="2" class="th-full">
 				<?php
-				$signup_url = network_site_url( 'wp-signup.php' );
 				/** This filter is documented in wp-login.php */
+				$sign_up_url = apply_filters( 'wp_signup_location', network_site_url( 'wp-signup.php' ) );
 				?>
-				<a href="<?php echo apply_filters( 'wp_signup_location', $signup_url ); ?>"><?php _e( 'Create a New Site' ); ?></a>
+				<a href="<?php echo esc_url( $sign_up_url ); ?>"><?php _e( 'Create a New Site' ); ?></a>
 			</th>
 		</tr>
 	<?php endif; ?>
@@ -686,13 +697,14 @@ function choose_primary_blog() {
  *
  * @since 3.0.0
  * @param int $user_id ID of the user to be granted Super Admin privileges.
+ * @return bool True on success, false on failure. This can fail when the user is
+ *              already a super admin or when the $super_admins global is defined.
  */
 function grant_super_admin( $user_id ) {
-	global $super_admins;
-
 	// If global super_admins override is defined, there is nothing to do here.
-	if ( isset( $super_admins ) )
+	if ( isset( $GLOBALS['super_admins'] ) ) {
 		return false;
+	}
 
 	/**
 	 * Fires before the user is granted Super Admin privileges.
@@ -729,13 +741,14 @@ function grant_super_admin( $user_id ) {
  *
  * @since 3.0.0
  * @param int $user_id ID of the user Super Admin privileges to be revoked from.
+ * @return bool True on success, false on failure. This can fail when the user's email
+ *              is the network admin email or when the $super_admins global is defined.
  */
 function revoke_super_admin( $user_id ) {
-	global $super_admins;
-
 	// If global super_admins override is defined, there is nothing to do here.
-	if ( isset( $super_admins ) )
+	if ( isset( $GLOBALS['super_admins'] ) ) {
 		return false;
+	}
 
 	/**
 	 * Fires before the user's Super Admin privileges are revoked.
@@ -806,7 +819,7 @@ function _thickbox_path_admin_subfolder() {
 ?>
 <script type="text/javascript">
 //<![CDATA[
-var tb_pathToImage = "../../wp-includes/js/thickbox/loadingAnimation.gif";
+var tb_pathToImage = "<?php echo includes_url( 'js/thickbox/loadingAnimation.gif', 'relative' ); ?>";
 //]]>
 </script>
 <?php

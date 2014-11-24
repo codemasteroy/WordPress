@@ -2,6 +2,11 @@
 	var api = wp.customize,
 		debounce;
 
+	/**
+	 * Returns a debounced version of the function.
+	 *
+	 * @todo Require Underscore.js for this file and retire this.
+	 */
 	debounce = function( fn, delay, context ) {
 		var timeout;
 		return function() {
@@ -17,6 +22,12 @@
 		};
 	};
 
+	/**
+	 * @constructor
+	 * @augments wp.customize.Messenger
+	 * @augments wp.customize.Class
+	 * @mixes wp.customize.Events
+	 */
 	api.Preview = api.Messenger.extend({
 		/**
 		 * Requires params:
@@ -90,12 +101,19 @@
 			preview.send( 'synced' );
 		});
 
-        preview.bind( 'active', function() {
-            if ( api.settings.nonce )
-                preview.send( 'nonce', api.settings.nonce );
-        });
+		preview.bind( 'active', function() {
+			if ( api.settings.nonce ) {
+				preview.send( 'nonce', api.settings.nonce );
+			}
 
-		preview.send( 'ready' );
+			preview.send( 'documentTitle', document.title );
+		});
+
+		preview.send( 'ready', {
+			activePanels: api.settings.activePanels,
+			activeSections: api.settings.activeSections,
+			activeControls: api.settings.activeControls
+		} );
 
 		/* Custom Backgrounds */
 		bg = $.map(['color', 'image', 'position_x', 'repeat', 'attachment'], function( prop ) {
@@ -107,11 +125,6 @@
 				head = $('head'),
 				style = $('#custom-background-css'),
 				update;
-
-			// If custom backgrounds are active and we can't find the
-			// default output, bail.
-			if ( body.hasClass('custom-background') && ! style.length )
-				return;
 
 			update = function() {
 				var css = '';

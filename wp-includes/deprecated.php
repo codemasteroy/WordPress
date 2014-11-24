@@ -451,12 +451,10 @@ function wp_get_linksbyname($category, $args = '') {
 /**
  * Gets an array of link objects associated with category $cat_name.
  *
- * <code>
- *	$links = get_linkobjectsbyname('fred');
- *	foreach ($links as $link) {
- * 		echo '<li>'.$link->link_name.'</li>';
- *	}
- * </code>
+ *     $links = get_linkobjectsbyname( 'fred' );
+ *     foreach ( $links as $link ) {
+ *      	echo '<li>' . $link->link_name . '</li>';
+ *     }
  *
  * @since 1.0.1
  * @deprecated 2.1.0
@@ -468,7 +466,7 @@ function wp_get_linksbyname($category, $args = '') {
  *		Or maybe owner. If you start the name with an underscore the order will be reversed. You can also
  *		specify 'rand' as the order which will return links in a random order.
  * @param int $limit Limit to X entries. If not specified, all entries are shown.
- * @return unknown
+ * @return array
  */
 function get_linkobjectsbyname($cat_name = "noname" , $orderby = 'name', $limit = -1) {
 	_deprecated_function( __FUNCTION__, '2.1', 'get_bookmarks()' );
@@ -485,31 +483,29 @@ function get_linkobjectsbyname($cat_name = "noname" , $orderby = 'name', $limit 
  * Gets an array of link objects associated with category n.
  *
  * Usage:
- * <code>
- *	$links = get_linkobjects(1);
- *	if ($links) {
- *		foreach ($links as $link) {
- *			echo '<li>'.$link->link_name.'<br />'.$link->link_description.'</li>';
- *		}
- *	}
- * </code>
+ *
+ *     $links = get_linkobjects(1);
+ *     if ($links) {
+ *     	foreach ($links as $link) {
+ *     		echo '<li>'.$link->link_name.'<br />'.$link->link_description.'</li>';
+ *     	}
+ *     }
  *
  * Fields are:
- * <ol>
- *	<li>link_id</li>
- *	<li>link_url</li>
- *	<li>link_name</li>
- *	<li>link_image</li>
- *	<li>link_target</li>
- *	<li>link_category</li>
- *	<li>link_description</li>
- *	<li>link_visible</li>
- *	<li>link_owner</li>
- *	<li>link_rating</li>
- *	<li>link_updated</li>
- *	<li>link_rel</li>
- *	<li>link_notes</li>
- * </ol>
+ *
+ * - link_id
+ * - link_url
+ * - link_name
+ * - link_image
+ * - link_target
+ * - link_category
+ * - link_description
+ * - link_visible
+ * - link_owner
+ * - link_rating
+ * - link_updated
+ * - link_rel
+ * - link_notes
  *
  * @since 1.0.1
  * @deprecated 2.1.0
@@ -522,7 +518,7 @@ function get_linkobjectsbyname($cat_name = "noname" , $orderby = 'name', $limit 
  *		underscore the order will be reversed. You can also specify 'rand' as the
  *		order which will return links in a random order.
  * @param int $limit Limit to X entries. If not specified, all entries are shown.
- * @return unknown
+ * @return array
  */
 function get_linkobjects($category = 0, $orderby = 'name', $limit = 0) {
 	_deprecated_function( __FUNCTION__, '2.1', 'get_bookmarks()' );
@@ -631,7 +627,7 @@ function get_autotoggle($id = 0) {
  * @param string $feed_image
  * @param string $exclude
  * @param bool $hierarchical
- * @return unknown
+ * @return string
  */
 function list_cats($optionall = 1, $all = 'All', $sort_column = 'ID', $sort_order = 'asc', $file = '', $list = true, $optiondates = 0,
 				   $optioncount = 0, $hide_empty = 1, $use_desc_for_title = 1, $children=false, $child_of=0, $categories=0,
@@ -650,7 +646,7 @@ function list_cats($optionall = 1, $all = 'All', $sort_column = 'ID', $sort_orde
  * @see wp_list_categories()
  *
  * @param string|array $args
- * @return unknown
+ * @return string
  */
 function wp_list_cats($args = '') {
 	_deprecated_function( __FUNCTION__, '2.1', 'wp_list_categories()' );
@@ -691,7 +687,7 @@ function wp_list_cats($args = '') {
  * @param bool $optionnone
  * @param int $selected
  * @param int $exclude
- * @return unknown
+ * @return string
  */
 function dropdown_cats($optionall = 1, $all = 'All', $orderby = 'ID', $order = 'asc',
 		$show_last_update = 0, $show_count = 0, $hide_empty = 1, $optionnone = false,
@@ -726,7 +722,7 @@ function dropdown_cats($optionall = 1, $all = 'All', $orderby = 'ID', $order = '
  * @param bool $hide_empty
  * @param string $feed
  * @param string $feed_image
- * @return unknown
+ * @return null|string
  */
 function list_authors($optioncount = false, $exclude_admin = true, $show_fullname = false, $hide_empty = true, $feed = '', $feed_image = '') {
 	_deprecated_function( __FUNCTION__, '2.1', 'wp_list_authors()' );
@@ -743,7 +739,7 @@ function list_authors($optioncount = false, $exclude_admin = true, $show_fullnam
  *
  * @param int $blogid Not Used
  * @param int $post_ID
- * @return unknown
+ * @return array
  */
 function wp_get_post_cats($blogid = '1', $post_ID = 0) {
 	_deprecated_function( __FUNCTION__, '2.1', 'wp_get_post_categories()' );
@@ -761,7 +757,7 @@ function wp_get_post_cats($blogid = '1', $post_ID = 0) {
  * @param int $blogid Not used
  * @param int $post_ID
  * @param array $post_categories
- * @return unknown
+ * @return bool|mixed
  */
 function wp_set_post_cats($blogid = '1', $post_ID = 0, $post_categories = array()) {
 	_deprecated_function( __FUNCTION__, '2.1', 'wp_set_post_categories()' );
@@ -780,7 +776,7 @@ function wp_set_post_cats($blogid = '1', $post_ID = 0, $post_categories = array(
  * @param string $before
  * @param string $after
  * @param bool $show_post_count
- * @return unknown
+ * @return string|null
  */
 function get_archives($type='', $limit='', $format='html', $before = '', $after = '', $show_post_count = false) {
 	_deprecated_function( __FUNCTION__, '2.1', 'wp_get_archives()' );
@@ -1098,7 +1094,7 @@ function links_popup_script($text = 'Links', $width=400, $height=400, $file='lin
  * @see sanitize_bookmark_field()
  *
  * @param object $link
- * @return unknown
+ * @return mixed
  */
 function get_linkrating($link) {
 	_deprecated_function( __FUNCTION__, '2.1', 'sanitize_bookmark_field()' );
@@ -1306,6 +1302,27 @@ function get_category_children( $id, $before = '/', $after = '', $visited = arra
 		}
 	}
 	return $chain;
+}
+
+/**
+ * Retrieves all category IDs.
+ *
+ * @since 2.0.0
+ * @deprecated 4.0.0 Use get_terms() instead.
+ * @see get_terms()
+ * @link http://codex.wordpress.org/Function_Reference/get_all_category_ids
+ *
+ * @return object List of all of the category IDs.
+ */
+function get_all_category_ids() {
+	_deprecated_function( __FUNCTION__, '4.0', 'get_terms()' );
+
+	if ( ! $cat_ids = wp_cache_get( 'all_category_ids', 'category' ) ) {
+		$cat_ids = get_terms( 'category', array('fields' => 'ids', 'get' => 'all') );
+		wp_cache_add( 'all_category_ids', $cat_ids, 'category' );
+	}
+
+	return $cat_ids;
 }
 
 /**
@@ -1677,10 +1694,7 @@ function the_author_ID() {
  * dots added to the end. If there is content left over, then dots will be added
  * and the rest of the content will be removed.
  *
- * @package WordPress
- * @subpackage Feed
  * @since 0.71
- * @uses apply_filters() Calls 'the_content_rss' on the content before processing.
  *
  * @deprecated 2.9.0
  * @deprecated Use the_content_feed()
@@ -1788,7 +1802,6 @@ function _c( $text, $domain = 'default' ) {
  * contains a context after its last vertical bar.
  *
  * @since 2.5.0
- * @uses translate()
  * @deprecated 3.0.0
  * @deprecated Use _x()
  * @see _x()
@@ -1918,13 +1931,11 @@ function get_attachment_icon_src( $id = 0, $fullsize = false ) {
 		// We have a thumbnail desired, specified and existing
 
 		$src_file = basename($src);
-		$class = 'attachmentthumb';
 	} elseif ( wp_attachment_is_image( $post->ID ) ) {
 		// We have an image without a thumbnail
 
 		$src = wp_get_attachment_url( $post->ID );
 		$src_file = & $file;
-		$class = 'attachmentimage';
 	} elseif ( $src = wp_mime_type_icon( $post->ID ) ) {
 		// No thumb, no image. We'll look for a mime-related icon instead.
 
@@ -2409,7 +2420,8 @@ function update_usermeta( $user_id, $meta_key, $meta_value ) {
  *
  * @since 2.2.0
  * @deprecated 3.1.0
- * @uses $wpdb WordPress database object for queries
+ *
+ * @global wpdb $wpdb WordPress database abstraction object.
  * @uses $blog_id The Blog id of the blog for those that use more than one blog
  *
  * @param int $id Blog ID.
@@ -2973,7 +2985,7 @@ function get_current_theme() {
 /**
  * Accepts matches array from preg_replace_callback in wpautop() or a string.
  *
- * Ensures that the contents of a <<pre>>...<</pre>> HTML block are not
+ * Ensures that the contents of a `<pre>...</pre>` HTML block are not
  * converted into paragraphs or line-breaks.
  *
  * @since 1.2.0
@@ -3134,8 +3146,6 @@ function update_page_cache( &$pages ) {
  *
  * @since 2.0.0
  * @deprecated 3.4.0
- *
- * @uses do_action() Will call the 'clean_page_cache' hook action.
  *
  * @param int $id Page ID to clean
  */
@@ -3396,7 +3406,8 @@ function _search_terms_tidy( $t ) {
 /**
  * Determine if TinyMCE is available.
  *
- * Checks to see if the user has deleted the tinymce files to slim down their WordPress install.
+ * Checks to see if the user has deleted the tinymce files to slim down
+ * their WordPress install.
  *
  * @since 2.1.0
  * @deprecated 3.9.0
@@ -3413,3 +3424,71 @@ function rich_edit_exists() {
 	return $wp_rich_edit_exists;
 }
 
+/**
+ * Old callback for tag link tooltips.
+ *
+ * @since 2.7.0
+ * @deprecated 3.9.0
+ * @access private
+ */
+function default_topic_count_text( $count ) {
+	return $count;
+}
+
+/**
+ * Formerly used to escape strings before inserting into the DB.
+ *
+ * Has not performed this function for many, many years. Use wpdb::prepare() instead.
+ *
+ * @since 0.71
+ * @deprecated 3.9.0
+ *
+ * @param string $content The text to format.
+ * @return string The very same text.
+ */
+function format_to_post( $content ) {
+	_deprecated_function( __FUNCTION__, '3.9' );
+	return $content;
+}
+
+/**
+ * Formerly used to escape strings before searching the DB. It was poorly documented and never worked as described.
+ *
+ * @since 2.5.0
+ * @deprecated 4.0.0
+ * @deprecated Use wpdb::esc_like()
+ *
+ * @param string $text The text to be escaped.
+ * @return string text, safe for inclusion in LIKE query.
+ */
+function like_escape($text) {
+	_deprecated_function( __FUNCTION__, '4.0', 'wpdb::esc_like()' );
+	return str_replace( array( "%", "_" ), array( "\\%", "\\_" ), $text );
+}
+
+/**
+ * Determines if the URL can be accessed over SSL.
+ *
+ * Determines if the URL can be accessed over SSL by using the WordPress HTTP API to access
+ * the URL using https as the scheme.
+ *
+ * @since 2.5.0
+ * @deprecated 4.0.0
+ *
+ * @param string $url The URL to test.
+ * @return bool Whether SSL access is available.
+ */
+function url_is_accessable_via_ssl( $url ) {
+	_deprecated_function( __FUNCTION__, '4.0' );
+
+	$response = wp_remote_get( set_url_scheme( $url, 'https' ) );
+
+	if ( !is_wp_error( $response ) ) {
+		$status = wp_remote_retrieve_response_code( $response );
+		if ( 200 == $status || 401 == $status ) {
+			return true;
+		}
+	}
+
+	return false;
+}

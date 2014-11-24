@@ -1,4 +1,4 @@
-/* global tinymce, QTags, tb_remove */
+/* global tinymce, QTags */
 // send html to the post editor
 
 var wpActiveEditor, send_to_editor;
@@ -40,11 +40,11 @@ var tb_position;
 		var tbWindow = $('#TB_window'),
 			width = $(window).width(),
 			H = $(window).height(),
-			W = ( 720 < width ) ? 720 : width,
+			W = ( 833 < width ) ? 833 : width,
 			adminbar_height = 0;
 
-		if ( $('body.admin-bar').length ) {
-			adminbar_height = parseInt( jQuery('#wpadminbar').css('height'), 10 );
+		if ( $('#wpadminbar').length ) {
+			adminbar_height = parseInt( $('#wpadminbar').css('height'), 10 );
 		}
 
 		if ( tbWindow.size() ) {

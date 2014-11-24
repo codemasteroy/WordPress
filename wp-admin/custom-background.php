@@ -22,7 +22,7 @@ class Custom_Background {
 	 * @since 3.0.0
 	 * @access private
 	 */
-	var $admin_header_callback;
+	private $admin_header_callback;
 
 	/**
 	 * Callback for header div.
@@ -31,7 +31,7 @@ class Custom_Background {
 	 * @since 3.0.0
 	 * @access private
 	 */
-	var $admin_image_div_callback;
+	private $admin_image_div_callback;
 
 	/**
 	 * Holds the page menu hook.
@@ -40,7 +40,12 @@ class Custom_Background {
 	 * @since 3.0.0
 	 * @access private
 	 */
-	var $page = '';
+	private $page = '';
+
+	/**
+	 * @var bool
+	 */
+	private $updated;
 
 	/**
 	 * Constructor - Register administration header callback.
@@ -50,7 +55,7 @@ class Custom_Background {
 	 * @param callback $admin_image_div_callback Optional custom image div output callback.
 	 * @return Custom_Background
 	 */
-	function __construct($admin_header_callback = '', $admin_image_div_callback = '') {
+	public function __construct($admin_header_callback = '', $admin_image_div_callback = '') {
 		$this->admin_header_callback = $admin_header_callback;
 		$this->admin_image_div_callback = $admin_image_div_callback;
 
@@ -59,11 +64,63 @@ class Custom_Background {
 	}
 
 	/**
+	 * Make private properties readable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name Property name.
+	 * @return mixed Property.
+	 */
+	public function __get( $name ) {
+		return $this->$name;
+	}
+
+	/**
+	 * Make private properties settable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name  Property to set.
+	 * @param mixed  $value Property value.
+	 * @return mixed Newly-set property.
+	 */
+	public function __set( $name, $value ) {
+		return $this->$name = $value;
+	}
+
+	/**
+	 * Make private properties checkable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name Property to check if set.
+	 * @return bool Whether the property is set.
+	 */
+	public function __isset( $name ) {
+		return isset( $this->$name );
+	}
+
+	/**
+	 * Make private properties un-settable for backwards compatibility.
+	 *
+	 * @since 4.0.0
+	 * @access public
+	 *
+	 * @param string $name Property to unset.
+	 */
+	public function __unset( $name ) {
+		unset( $this->$name );
+	}
+
+	/**
 	 * Set up the hooks for the Custom Background admin page.
 	 *
 	 * @since 3.0.0
 	 */
-	function init() {
+	public function init() {
 		if ( ! current_user_can('edit_theme_options') )
 			return;
 
@@ -82,7 +139,7 @@ class Custom_Background {
 	 *
 	 * @since 3.0.0
 	 */
-	function admin_load() {
+	public function admin_load() {
 		get_current_screen()->add_help_tab( array(
 			'id'      => 'overview',
 			'title'   => __('Overview'),
@@ -96,7 +153,7 @@ class Custom_Background {
 		get_current_screen()->set_help_sidebar(
 			'<p><strong>' . __( 'For more information:' ) . '</strong></p>' .
 			'<p>' . __( '<a href="http://codex.wordpress.org/Appearance_Background_Screen" target="_blank">Documentation on Custom Background</a>' ) . '</p>' .
-			'<p>' . __( '<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>' ) . '</p>'
+			'<p>' . __( '<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>' ) . '</p>'
 		);
 
 		wp_enqueue_media();
@@ -109,7 +166,7 @@ class Custom_Background {
 	 *
 	 * @since 3.0.0
 	 */
-	function take_action() {
+	public function take_action() {
 
 		if ( empty($_POST) )
 			return;
@@ -176,10 +233,23 @@ class Custom_Background {
 	 *
 	 * @since 3.0.0
 	 */
-	function admin_page() {
+	public function admin_page() {
 ?>
 <div class="wrap" id="custom-background">
 <h2><?php _e( 'Custom Background' ); ?></h2>
+
+<?php if ( current_user_can( 'customize' ) ) { ?>
+<div class="update-nag hide-if-no-customize">
+	<p>
+		<?php
+		printf(
+			__( 'You can now manage and live-preview Custom Backgrounds in the <a href="%1$s">Customizer</a>.' ),
+			admin_url( 'customize.php?autofocus[control]=background_image' )
+		);
+		?>
+	</p>
+</div>
+<?php } ?>
 
 <?php if ( ! empty( $this->updated ) ) { ?>
 <div id="message" class="updated">
@@ -204,7 +274,8 @@ class Custom_Background {
 
 		if ( get_background_image() ) {
 			$background_image_thumb = esc_url( set_url_scheme( get_theme_mod( 'background_image_thumb', str_replace( '%', '%%', get_background_image() ) ) ) );
-			// background-image URL must be single quote, see below
+
+			// Background-image URL must be single quote, see below.
 			$background_styles .= ' background-image: url(\'' . $background_image_thumb . '\');'
 				. ' background-repeat: ' . get_theme_mod( 'background_repeat', get_theme_support( 'custom-background', 'default-repeat' ) ) . ';'
 				. ' background-position: top ' . get_theme_mod( 'background_position_x', get_theme_support( 'custom-background', 'default-position-x' ) );
@@ -259,9 +330,9 @@ class Custom_Background {
 	</p>
 	<p>
 		<label for="choose-from-library-link"><?php _e( 'Or choose an image from your media library:' ); ?></label><br />
-		<a id="choose-from-library-link" class="button"
+		<button id="choose-from-library-link" class="button"
 			data-choose="<?php esc_attr_e( 'Choose a Background Image' ); ?>"
-			data-update="<?php esc_attr_e( 'Set as background' ); ?>"><?php _e( 'Choose Image' ); ?></a>
+			data-update="<?php esc_attr_e( 'Set as background' ); ?>"><?php _e( 'Choose Image' ); ?></button>
 	</p>
 	</form>
 </td>
@@ -343,7 +414,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 *
 	 * @since 3.0.0
 	 */
-	function handle_upload() {
+	public function handle_upload() {
 
 		if ( empty($_FILES) )
 			return;
@@ -397,7 +468,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 *
 	 * @since 3.4.0
 	 */
-	function attachment_fields_to_edit( $form_fields ) {
+	public function attachment_fields_to_edit( $form_fields ) {
 		return $form_fields;
 	}
 
@@ -406,7 +477,7 @@ if ( current_theme_supports( 'custom-background', 'default-color' ) )
 	 *
 	 * @since 3.4.0
 	 */
-	function filter_upload_tabs( $tabs ) {
+	public function filter_upload_tabs( $tabs ) {
 		return $tabs;
 	}
 

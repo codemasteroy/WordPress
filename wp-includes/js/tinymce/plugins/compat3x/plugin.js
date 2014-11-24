@@ -9,6 +9,7 @@
  */
 
 /*global tinymce:true, console:true */
+/*eslint no-console:0, new-cap:0 */
 
 /**
  * This plugin adds missing events form the 4.x API back. Not every event is
@@ -21,6 +22,9 @@
 (function(tinymce) {
 	var reported;
 
+	function noop() {
+	}
+
 	function log(apiCall) {
 		if (!reported && window && window.console) {
 			reported = true;
@@ -31,12 +35,12 @@
 	function Dispatcher(target, newEventName, argsMap, defaultScope) {
 		target = target || this;
 
-		if ( ! newEventName ) {
-			this.add = this.addToTop = this.remove = this.dispatch = function(){};
+		if (!newEventName) {
+			this.add = this.addToTop = this.remove = this.dispatch = noop;
 			return;
 		}
-		
-		this.add = function(callback, scope) {
+
+		this.add = function(callback, scope, prepend) {
 			log('<target>.on' + newEventName + ".add(..)");
 
 			// Convert callback({arg1:x, arg2:x}) -> callback(arg1, arg2)
@@ -71,13 +75,14 @@
 				}
 			}
 
-			target.on(newEventName, patchedEventCallback);
+			target.on(newEventName, patchedEventCallback, prepend);
 
 			return patchedEventCallback;
 		};
 
-		// Not supported to just use add
-		this.addToTop = this.add;
+		this.addToTop = function(callback, scope) {
+			this.add(callback, scope, true);
+		};
 
 		this.remove = function(callback) {
 			return target.off(newEventName, callback);
@@ -94,8 +99,6 @@
 	tinymce.onBeforeUnload = new Dispatcher(tinymce, "BeforeUnload");
 	tinymce.onAddEditor = new Dispatcher(tinymce, "AddEditor", "editor");
 	tinymce.onRemoveEditor = new Dispatcher(tinymce, "RemoveEditor", "editor");
-
-	function noop(){}
 
 	tinymce.util.Cookie = {
 		get: noop, getHash: noop, remove: noop, set: noop, setHash: noop
@@ -139,7 +142,7 @@
 				return cmNoop();
 			}
 
-			tinymce.each( methods.split(' '), function( method ) {
+			tinymce.each(methods.split(' '), function(method) {
 				obj[method] = _noop;
 			});
 
@@ -168,7 +171,9 @@
 			onAdd: new Dispatcher(),
 			onPostRender: new Dispatcher(),
 
-			add: function(obj) { return obj; },
+			add: function(obj) {
+				return obj;
+			},
 			createButton: cmNoop,
 			createColorSplitButton: cmNoop,
 			createControl: cmNoop,
@@ -226,12 +231,14 @@
 			}
 
 			if ( settings.title ) {
+				// WP
 				string = (editor.settings.language || "en") + "." + settings.title;
 				translated = tinymce.i18n.translate(string);
 
 				if ( string !== translated ) {
 					settings.title = translated;
 				}
+				// WP end
 			}
 
 			return originalAddButton.call(this, name, settings);

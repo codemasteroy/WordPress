@@ -10,6 +10,9 @@
 /** Load WordPress Administration Bootstrap */
 require_once( dirname( __FILE__ ) . '/admin.php' );
 
+/** WordPress Translation Install API */
+require_once( ABSPATH . 'wp-admin/includes/translation-install.php' );
+
 if ( ! is_multisite() )
 	wp_die( __( 'Multisite support is not enabled.' ) );
 
@@ -18,6 +21,29 @@ if ( ! current_user_can( 'manage_network_options' ) )
 
 $title = __( 'Network Settings' );
 $parent_file = 'settings.php';
+
+/**
+ * Display JavaScript on the page.
+ *
+ * @since 4.1.0
+*/
+function network_settings_add_js() {
+?>
+<script type="text/javascript">
+jQuery(document).ready( function($) {
+	var languageSelect = $( '#WPLANG' );
+	$( 'form' ).submit( function() {
+		// Don't show a spinner for English and installed languages,
+		// as there is nothing to download.
+		if ( ! languageSelect.find( 'option:selected' ).data( 'installed' ) ) {
+			$( '#submit', this ).after( '<span class="spinner language-install-spinner" />' );
+		}
+	});
+});
+</script>
+<?php
+}
+add_action( 'admin_head', 'network_settings_add_js' );
 
 get_current_screen()->add_help_tab( array(
 		'id'      => 'overview',
@@ -35,7 +61,7 @@ get_current_screen()->add_help_tab( array(
 get_current_screen()->set_help_sidebar(
 	'<p><strong>' . __('For more information:') . '</strong></p>' .
 	'<p>' . __('<a href="http://codex.wordpress.org/Network_Admin_Settings_Screen" target="_blank">Documentation on Network Settings</a>') . '</p>' .
-	'<p>' . __('<a href="http://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
+	'<p>' . __('<a href="https://wordpress.org/support/" target="_blank">Support Forums</a>') . '</p>'
 );
 
 if ( $_POST ) {
@@ -57,6 +83,14 @@ if ( $_POST ) {
 		'welcome_email', 'welcome_user_email', 'fileupload_maxk', 'global_terms_enabled',
 		'illegal_names', 'limited_email_domains', 'banned_email_domains', 'WPLANG', 'admin_email',
 	);
+
+	// Handle translation install.
+	if ( ! empty( $_POST['WPLANG'] ) && wp_can_install_language_pack() ) {  // @todo: Skip if already installed
+		$language = wp_download_language_pack( $_POST['WPLANG'] );
+		if ( $language ) {
+			$_POST['WPLANG'] = $language;
+		}
+	}
 
 	foreach ( $options as $option_name ) {
 		if ( ! isset($_POST[$option_name]) )
@@ -85,7 +119,7 @@ if ( isset( $_GET['updated'] ) ) {
 
 <div class="wrap">
 	<h2><?php echo esc_html( $title ); ?></h2>
-	<form method="post" action="settings.php">
+	<form method="post" action="settings.php" novalidate="novalidate">
 		<?php wp_nonce_field( 'siteoptions' ); ?>
 		<h3><?php _e( 'Operational Settings' ); ?></h3>
 		<table class="form-table">
@@ -99,10 +133,10 @@ if ( isset( $_GET['updated'] ) ) {
 			<tr>
 				<th scope="row"><label for="admin_email"><?php _e( 'Network Admin Email' ) ?></label></th>
 				<td>
-					<input name="admin_email" type="text" id="admin_email" class="regular-text" value="<?php echo esc_attr( get_site_option('admin_email') ) ?>" />
+					<input name="admin_email" type="email" id="admin_email" class="regular-text" value="<?php echo esc_attr( get_site_option( 'admin_email' ) ) ?>" />
 					<p class="description">
 						<?php _e( 'This email address will receive notifications. Registration and support emails will also come from this address.' ); ?>
-					</p>	
+					</p>
 				</td>
 			</tr>
 			<?php 
@@ -172,7 +206,7 @@ if ( isset( $_GET['updated'] ) ) {
 <?php echo esc_textarea( $limited_email_domains == '' ? '' : implode( "\n", (array) $limited_email_domains ) ); ?></textarea>
 					<p class="description">
 						<?php _e( 'If you want to limit site registrations to certain domains. One domain per line.' ) ?>
-					</p>	
+					</p>
 				</td>
 			</tr>
 
@@ -244,7 +278,7 @@ if ( isset( $_GET['updated'] ) ) {
 <?php echo esc_textarea( get_site_option( 'first_comment' ) ) ?></textarea>
 					<p class="description">
 						<?php _e( 'The first comment on a new site.' ) ?>
-					</p>	
+					</p>
 				</td>
 			</tr>
 			<tr>
@@ -285,7 +319,7 @@ if ( isset( $_GET['updated'] ) ) {
 
 			<tr>
 				<th scope="row"><label for="upload_filetypes"><?php _e( 'Upload file types' ) ?></label></th>
-				<td><input name="upload_filetypes" type="text" id="upload_filetypes" class="large-text" value="<?php echo esc_attr( get_site_option('upload_filetypes', 'jpg jpeg png gif') ) ?>" size="45" /></td>
+				<td><input name="upload_filetypes" type="text" id="upload_filetypes" class="large-text" value="<?php echo esc_attr( get_site_option( 'upload_filetypes', 'jpg jpeg png gif' ) ) ?>" size="45" /></td>
 			</tr>
 
 			<tr>
@@ -301,19 +335,31 @@ if ( isset( $_GET['updated'] ) ) {
 			do_action( 'wpmu_upload_options' ); ?>
 		</table>
 
-<?php
+		<?php
 		$languages = get_available_languages();
-		if ( ! empty( $languages ) ) {
-			$lang = get_site_option( 'WPLANG' );
-?>
-		<h3><?php _e( 'Language Settings' ); ?></h3>
-		<table class="form-table">
+		$translations = wp_get_available_translations();
+		if ( ! empty( $languages ) || ! empty( $translations ) ) {
+			?>
+			<h3><?php _e( 'Language Settings' ); ?></h3>
+			<table class="form-table">
 				<tr>
 					<th><label for="WPLANG"><?php _e( 'Default Language' ); ?></label></th>
 					<td>
-						<select name="WPLANG" id="WPLANG">
-							<?php mu_dropdown_languages( $languages, get_site_option( 'WPLANG' ) ); ?>
-						</select>
+						<?php
+						$lang = get_site_option( 'WPLANG' );
+						if ( ! in_array( $lang, $languages ) ) {
+							$lang = '';
+						}
+
+						wp_dropdown_languages( array(
+							'name'         => 'WPLANG',
+							'id'           => 'WPLANG',
+							'selected'     => $lang,
+							'languages'    => $languages,
+							'translations' => $translations,
+							'show_available_translations' => wp_can_install_language_pack(),
+						) );
+						?>
 					</td>
 				</tr>
 				<?php 
@@ -327,7 +373,6 @@ if ( isset( $_GET['updated'] ) ) {
 <?php
 		} // languages
 ?>
-
 		<h3><?php _e( 'Menu Settings' ); ?></h3>
 		<table id="menu" class="form-table">
 			<tr>
@@ -367,7 +412,7 @@ if ( isset( $_GET['updated'] ) ) {
 			do_action( 'wpmu_menu_options' ); ?>
 		</table>
 
-		<?php 
+		<?php
 		/**
 		 * Fires at the end of the Network Settings form, before the submit button.
 		 *

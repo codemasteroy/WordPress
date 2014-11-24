@@ -47,11 +47,13 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 	global $self, $parent_file, $submenu_file, $plugin_page, $typenow;
 
 	$first = true;
-	// 0 = name, 1 = capability, 2 = file, 3 = class, 4 = id, 5 = icon src
+	// 0 = menu_title, 1 = capability, 2 = menu_slug, 3 = page_title, 4 = classes, 5 = hookname, 6 = icon_url
 	foreach ( $menu as $key => $item ) {
 		$admin_is_parent = false;
 		$class = array();
 		$aria_attributes = '';
+		$aria_hidden = '';
+		$is_separator = false;
 
 		if ( $first ) {
 			$class[] = 'wp-first-item';
@@ -73,15 +75,23 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 		}
 
 		if ( ! empty( $item[4] ) )
-			$class[] = $item[4];
+			$class[] = esc_attr( $item[4] );
 
 		$class = $class ? ' class="' . join( ' ', $class ) . '"' : '';
 		$id = ! empty( $item[5] ) ? ' id="' . preg_replace( '|[^a-zA-Z0-9_:.]|', '-', $item[5] ) . '"' : '';
-		$img = $img_style = $img_class = '';
+		$img = $img_style = '';
+		$img_class = ' dashicons-before';
 
-		// if the string 'none' (previously 'div') is passed instead of an URL, don't output the default menu image
-		// so an icon can be added to div.wp-menu-image as background with CSS.
-		// Dashicons and base64-encoded data:image/svg_xml URIs are also handled as special cases.
+		if ( false !== strpos( $class, 'wp-menu-separator' ) ) {
+			$is_separator = true;
+		}
+
+		/*
+		 * If the string 'none' (previously 'div') is passed instead of an URL, don't output
+		 * the default menu image so an icon can be added to div.wp-menu-image as background
+		 * with CSS. Dashicons and base64-encoded data:image/svg_xml URIs are also handled
+		 * as special cases.
+		 */
 		if ( ! empty( $item[6] ) ) {
 			$img = '<img src="' . $item[6] . '" alt="" />';
 
@@ -93,16 +103,21 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 				$img_class = ' svg';
 			} elseif ( 0 === strpos( $item[6], 'dashicons-' ) ) {
 				$img = '<br />';
-				$img_class = ' dashicons ' . sanitize_html_class( $item[6] );
+				$img_class = ' dashicons-before ' . sanitize_html_class( $item[6] );
 			}
 		}
 		$arrow = '<div class="wp-menu-arrow"><div></div></div>';
 
 		$title = wptexturize( $item[0] );
 
-		echo "\n\t<li$class$id>";
+		// hide separators from screen readers
+		if ( $is_separator ) {
+			$aria_hidden = ' aria-hidden="true"';
+		}
 
-		if ( false !== strpos( $class, 'wp-menu-separator' ) ) {
+		echo "\n\t<li$class$id$aria_hidden>";
+
+		if ( $is_separator ) {
 			echo '<div class="separator"></div>';
 		} elseif ( $submenu_as_parent && ! empty( $submenu_items ) ) {
 			$submenu_items = array_values( $submenu_items );  // Re-index.
@@ -134,6 +149,8 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 			echo "<li class='wp-submenu-head'>{$item[0]}</li>";
 
 			$first = true;
+
+			// 0 = menu_title, 1 = capability, 2 = menu_slug, 3 = page_title, 4 = classes
 			foreach ( $submenu_items as $sub_key => $sub_item ) {
 				if ( ! current_user_can( $sub_item[1] ) )
 					continue;
@@ -162,6 +179,10 @@ function _wp_menu_output( $menu, $submenu, $submenu_as_parent = true ) {
 					( isset( $plugin_page ) && $plugin_page == $sub_item[2] && ( $item[2] == $self_type || $item[2] == $self || file_exists($menu_file) === false ) )
 				) {
 					$class[] = 'current';
+				}
+
+				if ( ! empty( $sub_item[4] ) ) {
+					$class[] = esc_attr( $sub_item[4] );
 				}
 
 				$class = $class ? ' class="' . join( ' ', $class ) . '"' : '';

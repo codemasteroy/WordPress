@@ -1,4 +1,4 @@
-/* global ajaxurl, deleteUserSetting, setUserSetting, switchEditors, tinymce, tinyMCEPreInit, wp_fullscreen_settings, wpActiveEditor:true, wpLink */
+/* global deleteUserSetting, setUserSetting, switchEditors, tinymce, tinyMCEPreInit */
 /**
  * Distraction Free Writing
  * (wp-fullscreen)
@@ -7,7 +7,6 @@
  */
 ( function( $, window ) {
 	var api, ps, s, toggleUI, uiTimer, PubSub,
-		oldheight = 0,
 		uiScrollTop = 0,
 		transitionend = 'transitionend webkitTransitionEnd',
 		$body = $( document.body ),
@@ -86,7 +85,6 @@
 
 	function _hideUI() {
 		$body.removeClass('wp-dfw-show-ui');
-		uiShown = false;
 	}
 
 	/**
@@ -94,14 +92,16 @@
 	 *
 	 * Toggle the CSS class to show/hide the toolbar, borders and statusbar.
 	 */
-	toggleUI = api.toggleUI = function( hide ) {
+	toggleUI = api.toggleUI = function( show ) {
 		clearTimeout( uiTimer );
 
-		if ( ! $body.hasClass('wp-dfw-show-ui') ) {
+		if ( ! $body.hasClass('wp-dfw-show-ui') || show === 'show' ) {
 			$body.addClass('wp-dfw-show-ui');
+		} else if ( show !== 'autohide' ) {
+			$body.removeClass('wp-dfw-show-ui');
 		}
 
-		if ( hide === 'hide' ) {
+		if ( show === 'autohide' ) {
 			uiTimer = setTimeout( _hideUI, 2000 );
 		}
 	};
@@ -136,7 +136,7 @@
 	 * @param string mode Optional. Switch to the given mode before opening.
 	 */
 	api.on = function() {
-		var id, $dfwWrap, editor, titleId;
+		var id, $dfwWrap, titleId;
 
 		if ( s.visible ) {
 			return;
@@ -264,11 +264,12 @@
 		var $hidden = $('#hiddenaction'),
 			oldVal = $hidden.val(),
 			$spinner = $('#wp-fullscreen-save .spinner'),
-			$saveMessage = $('#wp-fullscreen-save .wp-fullscreen-saved-message')
+			$saveMessage = $('#wp-fullscreen-save .wp-fullscreen-saved-message'),
 			$errorMessage = $('#wp-fullscreen-save .wp-fullscreen-error-message');
 
 		$spinner.show();
 		$errorMessage.hide();
+		$saveMessage.hide();
 		$hidden.val('wp-fullscreen-save-post');
 
 		if ( s.editor && ! s.editor.isHidden() ) {
@@ -307,10 +308,21 @@
 	api.dfwWidth = function( pixels, total ) {
 		var width;
 
+		if ( pixels && pixels.toString().indexOf('%') !== -1 ) {
+			s.$editorContainer.css( 'width', pixels );
+			s.$statusbar.css( 'width', pixels );
+
+			if ( s.$dfwTitle ) {
+				s.$dfwTitle.css( 'width', pixels );
+			}
+			return;
+		}
+
 		if ( ! pixels ) {
-			// reset to theme width
+			// Reset to theme width
 			width = $('#wp-fullscreen-body').data('theme-width') || 800;
 			s.$editorContainer.width( width );
+			s.$statusbar.width( width );
 
 			if ( s.$dfwTitle ) {
 				s.$dfwTitle.width( width - 16 );
@@ -333,6 +345,7 @@
 		}
 
 		s.$editorContainer.width( width );
+		s.$statusbar.width( width );
 
 		if ( s.$dfwTitle ) {
 			s.$dfwTitle.width( width - 16 );
@@ -353,9 +366,7 @@
 	// This event occurs while the overlay blocks the UI.
 	ps.subscribe( 'showing', function() {
 		$body.addClass( 'wp-fullscreen-active' );
-
 		s.$dfwWrap.addClass( 'wp-fullscreen-wrap' );
-		s.$editorContainer.append( $('#wp-fullscreen-status') );
 
 		if ( s.$dfwTitle ) {
 			s.$dfwTitle.after( '<span id="wp-fullscreen-title-placeholder">' );
@@ -367,7 +378,7 @@
 		$('#wpadminbar').hide();
 
 		// Show the UI for 2 sec. when opening
-		toggleUI('hide');
+		toggleUI('autohide');
 
 		api.bind_resize();
 
@@ -375,7 +386,11 @@
 			s.editor.execCommand( 'wpFullScreenOn' );
 		}
 
-		api.dfwWidth( $( '#wp-fullscreen-body' ).data('dfw-width') || 800, true );
+		if ( 'ontouchstart' in window ) {
+			api.dfwWidth( '90%' );
+		} else {
+			api.dfwWidth( $( '#wp-fullscreen-body' ).data('dfw-width') || 800, true );
+		}
 
 		// scroll to top so the user is not disoriented
 		scrollTo(0, 0);
@@ -399,13 +414,12 @@
 
 	ps.subscribe( 'hiding', function() { // This event occurs while the overlay blocks the DFW UI.
 		$body.removeClass( 'wp-fullscreen-active' );
-		$( '#wp-fullscreen-body' ).append( $('#wp-fullscreen-status') );
 
 		if ( s.$dfwTitle ) {
 			$( '#wp-fullscreen-title-placeholder' ).before( s.$dfwTitle.removeClass('wp-fullscreen-title').css( 'width', '' ) ).remove();
 		}
 
-		s.$dfwWrap.removeClass( 'wp-fullscreen-wrap' )
+		s.$dfwWrap.removeClass( 'wp-fullscreen-wrap' );
 		s.$editorContainer.css( 'width', '' );
 		s.$dfwTextarea.add( '#' + s.id + '_ifr' ).height( s.origHeight );
 
@@ -426,7 +440,8 @@
 
 	api.refreshButtons = function( fade ) {
 		if ( s.mode === 'html' ) {
-			$('#wp-fullscreen-mode-bar').removeClass('wp-tmce-mode').addClass('wp-html-mode');
+			$('#wp-fullscreen-mode-bar').removeClass('wp-tmce-mode').addClass('wp-html-mode')
+				.find('a').removeClass( 'active' ).filter('.wp-fullscreen-mode-html').addClass( 'active' );
 
 			if ( fade ) {
 				$('#wp-fullscreen-button-bar').fadeOut( 150, function(){
@@ -436,7 +451,8 @@
 				$('#wp-fullscreen-button-bar').addClass('wp-html-mode');
 			}
 		} else if ( s.mode === 'tinymce' ) {
-			$('#wp-fullscreen-mode-bar').removeClass('wp-html-mode').addClass('wp-tmce-mode');
+			$('#wp-fullscreen-mode-bar').removeClass('wp-html-mode').addClass('wp-tmce-mode')
+				.find('a').removeClass( 'active' ).filter('.wp-fullscreen-mode-tinymce').addClass( 'active' );
 
 			if ( fade ) {
 				$('#wp-fullscreen-button-bar').fadeOut( 150, function(){
@@ -455,65 +471,61 @@
 	 */
 	api.ui = {
 		init: function() {
-			var toolbar, last = 0;
+			var toolbar;
 
 			s.toolbar = toolbar = $('#fullscreen-topbar');
 			s.$fullscreenFader = $('#fullscreen-fader');
+			s.$statusbar = $('#wp-fullscreen-status');
 			s.hasTinymce = typeof tinymce !== 'undefined';
 
 			if ( ! s.hasTinymce )
 				$('#wp-fullscreen-mode-bar').hide();
 
 			$document.keyup( function(e) {
-				var c = e.keyCode || e.charCode, a, data;
+				var c = e.keyCode || e.charCode, modKey;
 
 				if ( ! s.visible ) {
 					return;
 				}
 
 				if ( navigator.platform && navigator.platform.indexOf('Mac') !== -1 ) {
-					a = e.ctrlKey; // Ctrl key for Mac
+					modKey = e.ctrlKey; // Ctrl key for Mac
 				} else {
-					a = e.altKey; // Alt key for Win & Linux
+					modKey = e.altKey; // Alt key for Win & Linux
 				}
 
-				if ( 27 == c ) { // Esc
-					data = {
-						event: e,
-						what: 'dfw',
-						cb: api.off,
-						condition: function(){
-							if ( $('#TB_window').is(':visible') || $('.wp-dialog').is(':visible') )
-								return false;
-							return true;
-						}
-					};
-
-					if ( ! $(document).triggerHandler( 'wp_CloseOnEscape', [data] ) ) {
-						api.off();
-					}
-				}
-
-				if ( a && (61 == c || 107 == c || 187 == c) ) { // +
+				if ( modKey && ( 61 === c || 107 === c || 187 === c ) ) { // +
 					api.dfwWidth( 25 );
 					e.preventDefault();
 				}
 
-				if ( a && (45 == c || 109 == c || 189 == c) ) { // -
+				if ( modKey && ( 45 === c || 109 === c || 189 === c ) ) { // -
 					api.dfwWidth( -25 );
 					e.preventDefault();
 				}
 
-				if ( a && 48 == c ) { // 0
+				if ( modKey && 48 === c ) { // 0
 					api.dfwWidth( 0 );
 					e.preventDefault();
 				}
 			});
 
+			$( window ).on( 'keydown.wp-fullscreen', function( event ) {
+				// Turn fullscreen off when Esc is pressed.
+				if ( 27 === event.keyCode && s.visible ) {
+					api.off();
+					event.stopImmediatePropagation();
+				}
+			});
+
+			if ( 'ontouchstart' in window ) {
+				$body.addClass('wp-dfw-touch');
+			}
+
 			toolbar.on( 'mouseenter', function() {
 				toggleUI('show');
 			}).on( 'mouseleave', function() {
-				toggleUI('hide');
+				toggleUI('autohide');
 			});
 
 			// Bind buttons
@@ -539,9 +551,6 @@
 							break;
 						case 'unlink':
 							s.editor.execCommand('unlink');
-							break;
-						case 'image':
-							s.editor.execCommand('mceImage');
 							break;
 						case 'help':
 							s.editor.execCommand('WP_Help');
@@ -674,12 +683,12 @@
 	 * Automatically updates textarea height.
 	 */
 	api.bind_resize = function() {
-		s.$dfwTextarea.on( 'keydown.wp-dfw-resize click.wp-dfw-resize paste.wp-dfw-resize', function(e) {
-			api.resizeTextarea(e);
+		s.$dfwTextarea.on( 'keydown.wp-dfw-resize click.wp-dfw-resize paste.wp-dfw-resize', function() {
+			api.resizeTextarea();
 		});
 	};
 
-	api.resizeTextarea = function( event ) {
+	api.resizeTextarea = function() {
 		var node = s.$dfwTextarea[0];
 
 		if ( node.scrollHeight > node.clientHeight ) {
