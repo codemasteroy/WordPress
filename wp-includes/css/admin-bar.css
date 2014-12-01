@@ -598,7 +598,7 @@ html:lang(he-il) .rtl #wpadminbar *  {
 }
 
 #wpadminbar > #wp-toolbar > #wp-admin-bar-top-secondary > #wp-admin-bar-search #adminbarsearch label.adminbar-accessibility-label {
-	dispaly: none;
+	display: none;
 }
 
 #wpadminbar > #wp-toolbar > #wp-admin-bar-top-secondary > #wp-admin-bar-search #adminbarsearch input.adminbar-input:focus {
