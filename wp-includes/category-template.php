@@ -360,7 +360,8 @@ function wp_dropdown_categories( $args = '' ) {
 	$id = $r['id'] ? esc_attr( $r['id'] ) : $name;
 
 	if ( ! $r['hide_if_empty'] || ! empty( $categories ) ) {
-		$output = "<select name='$name' id='$id' class='$class' $tab_index_attribute>\n";
+		$output = "<label for='$id' class='screen-reader-text' >Select Category</label>\n";
+		$output .= "<select name='$name' id='$id' class='$class' $tab_index_attribute>\n";
 	} else {
 		$output = '';
 	}
