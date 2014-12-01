@@ -790,7 +790,8 @@ function wp_admin_bar_search_menu( $wp_admin_bar ) {
 		return;
 
 	$form  = '<form action="' . esc_url( home_url( '/' ) ) . '" method="get" id="adminbarsearch">';
-	$form .= '<input class="adminbar-input" name="s" id="adminbar-search" type="text" value="" maxlength="150" />';
+	$form .= '<label for="adminbar-search" class="adminbar-accessibility-label" >Search</label>';
+	$form .= '<input class="adminbar-input" name="s" id="adminbar-search" type="search" value="" maxlength="150" />';
 	$form .= '<input type="submit" class="adminbar-button" value="' . __('Search') . '"/>';
 	$form .= '</form>';
 
