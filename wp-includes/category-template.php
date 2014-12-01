@@ -336,10 +336,12 @@ function wp_dropdown_categories( $args = '' ) {
 	$class = esc_attr( $class );
 	$id = $id ? esc_attr( $id ) : $name;
 
-	if ( ! $r['hide_if_empty'] || ! empty($categories) )
-		$output = "<select name='$name' id='$id' class='$class' $tab_index_attribute>\n";
-	else
+	if ( ! $r['hide_if_empty'] || ! empty($categories) ) {
+		$output = "<label for='$id' class='screen-reader-text' >Select Category</label>\n"
+		$output .= "<select name='$name' id='$id' class='$class' $tab_index_attribute>\n";
+	} else {
 		$output = '';
+	}
 
 	if ( empty($categories) && ! $r['hide_if_empty'] && !empty($show_option_none) ) {
 		$show_option_none = apply_filters( 'list_cats', $show_option_none );
