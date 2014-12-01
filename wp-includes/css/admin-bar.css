@@ -597,10 +597,6 @@ html:lang(he-il) .rtl #wpadminbar *  {
 	transition-timing-function: ease;
 }
 
-#wpadminbar > #wp-toolbar > #wp-admin-bar-top-secondary > #wp-admin-bar-search #adminbarsearch label.adminbar-accessibility-label {
-	display: none;
-}
-
 #wpadminbar > #wp-toolbar > #wp-admin-bar-top-secondary > #wp-admin-bar-search #adminbarsearch input.adminbar-input:focus {
 	z-index: 10;
 	color: #000;
