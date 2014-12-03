@@ -242,6 +242,12 @@
 				}
 			}
 
+			function mceFullscreenToggled( event ) {
+				if ( ! event.state ) {
+					adjust();
+				}
+			}
+
 			// Adjust when switching editor modes.
 			function mceShow() {
 				$window.on( 'scroll.mce-float-panels', hideFloatPanels );
@@ -280,8 +286,10 @@
 				editor.on( 'wp-toolbar-toggle', toggleAdvanced );
 				// Adjust when the editor resizes.
 				editor.on( 'setcontent wp-autoresize wp-toolbar-toggle', adjust );
-				// Don't hide the caret after undo/redo
+				// Don't hide the caret after undo/redo.
 				editor.on( 'undo redo', mceScroll );
+				// Adjust when exiting TinyMCE's fullscreen mode.
+				editor.on( 'FullscreenStateChanged', mceFullscreenToggled );
 
 				$window.off( 'scroll.mce-float-panels' ).on( 'scroll.mce-float-panels', hideFloatPanels );
 			};
@@ -293,6 +301,7 @@
 				editor.off( 'wp-toolbar-toggle', toggleAdvanced );
 				editor.off( 'setcontent wp-autoresize wp-toolbar-toggle', adjust );
 				editor.off( 'undo redo', mceScroll );
+				editor.off( 'FullscreenStateChanged', mceFullscreenToggled );
 
 				$window.off( 'scroll.mce-float-panels' );
 			};
@@ -306,14 +315,13 @@
 
 		// Adjust the toolbars based on the active editor mode.
 		function adjust( event ) {
-			var type = event && event.type;
-
 			// Make sure we're not in fullscreen mode.
 			if ( fullscreen && fullscreen.settings.visible ) {
 				return;
 			}
 
 			var windowPos = $window.scrollTop(),
+				type = event && event.type,
 				resize = type !== 'scroll',
 				visual = ( mceEditor && ! mceEditor.isHidden() ),
 				buffer = autoresizeMinHeight,
@@ -458,7 +466,7 @@
 						// +[n] for the border around the .wp-editor-container.
 						( windowPos + heights.windowHeight ) <= ( editorPos + editorHeight + heights.bottomHeight + heights.statusBarHeight + borderWidth ) ) {
 
-					if ( event && event.deltaHeight > 0 ) {
+					if ( event && event.deltaHeight > 0 && event.deltaHeight < 100 ) {
 						window.scrollBy( 0, event.deltaHeight );
 					} else if ( advanced ) {
 						fixedBottom = true;
@@ -483,7 +491,9 @@
 
 					$statusBar.add( $bottom ).attr( 'style', '' );
 
-					! advanced && $statusBar.css( 'visibility', 'hidden' );
+					if ( ! advanced ) {
+						$statusBar.css( 'visibility', 'hidden' );
+					}
 				}
 			}
 
@@ -765,7 +775,7 @@
 			$editorWindow = $(),
 			$editorIframe = $(),
 			_isActive = window.getUserSetting( 'editor_expand', 'on' ) === 'on',
-			_isOn = _isActive ? !! parseInt( window.getUserSetting( 'dfw', '1' ), 10 ) : false,
+			_isOn = _isActive ? window.getUserSetting( 'post_dfw' ) === 'on' : false,
 			traveledX = 0,
 			traveledY = 0,
 			buffer = 20,
@@ -798,6 +808,7 @@
 				_isActive = true;
 
 				$document.trigger( 'dfw-activate' );
+				$content.on( 'keydown.focus-shortcut', toggleViaKeyboard );
 			}
 		}
 
@@ -808,6 +819,7 @@
 				_isActive = false;
 
 				$document.trigger( 'dfw-deactivate' );
+				$content.off( 'keydown.focus-shortcut' );
 			}
 		}
 
@@ -825,7 +837,7 @@
 
 				fadeOut();
 
-				window.setUserSetting( 'dfw', '1' );
+				window.setUserSetting( 'post_dfw', 'on' );
 
 				$document.trigger( 'dfw-on' );
 			}
@@ -841,14 +853,18 @@
 
 				$editor.off( '.focus' );
 
-				window.setUserSetting( 'dfw', '0' );
+				window.setUserSetting( 'post_dfw', 'off' );
 
 				$document.trigger( 'dfw-off' );
 			}
 		}
 
 		function toggle() {
-			( _isOn ? off : on )();
+			if ( _isOn ) {
+				off();
+			} else {
+				on();
+			}
 		}
 
 		function isOn() {
@@ -858,12 +874,13 @@
 		function fadeOut( event ) {
 			var key = event && event.keyCode;
 
-			if ( key === 27 ) {
-				fadeIn();
+			// fadeIn and return on Escape and keyboard shortcut Alt+Shift+W.
+			if ( key === 27 || ( key === 87 && event.altKey && event.shiftKey ) ) {
+				fadeIn( event );
 				return;
 			}
 
-			if ( event && ( event.metaKey || ( event.ctrlKey && ! event.altKey ) || ( key && (
+			if ( event && ( event.metaKey || ( event.ctrlKey && ! event.altKey ) || ( event.altKey && event.shiftKey ) || ( key && (
 				// Special keys ( tab, ctrl, alt, esc, arrow keys... )
 				( key <= 47 && key !== 8 && key !== 13 && key !== 32 && key !== 46 ) ||
 				// Windows keys
@@ -977,7 +994,7 @@
 			fadeOutSlug();
 		}
 
-		function fadeIn() {
+		function fadeIn( event ) {
 			if ( faded ) {
 				faded = false;
 
@@ -991,11 +1008,18 @@
 
 				$overlay.off( 'mouseenter.focus mouseleave.focus mousemove.focus touchstart.focus' );
 
-				$editor.on( 'mouseenter.focus', function() {
-					if ( $.contains( $editor.get( 0 ), document.activeElement ) || editorHasFocus ) {
-						fadeOut();
-					}
-				} );
+				/*
+				 * When fading in, temporarily watch for refocus and fade back out - helps
+				 * with 'accidental' editor exits with the mouse. When fading in and the event
+				 * is a key event (Escape or Alt+Shift+W) don't watch for refocus.
+				 */
+				if ( 'undefined' === typeof event ) {
+					$editor.on( 'mouseenter.focus', function() {
+						if ( $.contains( $editor.get( 0 ), document.activeElement ) || editorHasFocus ) {
+							fadeOut();
+						}
+					} );
+				}
 
 				focusLostTimer = setTimeout( function() {
 					focusLostTimer = null;
@@ -1017,7 +1041,7 @@
 					return $.contains( $el.get( 0 ), document.activeElement );
 				}
 
-				// The focussed node is before or behind the editor area, and not ouside the wrap.
+				// The focused node is before or behind the editor area, and not outside the wrap.
 				if ( ( position === 2 || position === 4 ) && ( hasFocus( $menuWrap ) || hasFocus( $wrap ) || hasFocus( $footer ) ) ) {
 					fadeIn();
 				}
@@ -1066,6 +1090,16 @@
 			}
 		}
 
+		function toggleViaKeyboard( event ) {
+			if ( event.altKey && event.shiftKey && 87 === event.keyCode ) {
+				toggle();
+			}
+		}
+
+		if ( $( '#postdivrich' ).hasClass( 'wp-editor-expand' ) ) {
+			$content.on( 'keydown.focus-shortcut', toggleViaKeyboard );
+		}
+
 		$document.on( 'tinymce-editor-setup.focus', function( event, editor ) {
 			editor.addButton( 'dfw', {
 				active: _isOn,
@@ -1089,8 +1123,12 @@
 						button.active( false );
 					} );
 				},
-				tooltip: 'Distraction Free Writing'
+				tooltip: 'Distraction Free Writing',
+				shortcut: 'Alt+Shift+W'
 			} );
+
+			editor.addCommand( 'wpToggleDFW', toggle );
+			editor.addShortcut( 'alt+shift+w', '', 'wpToggleDFW' );
 		} );
 
 		$document.on( 'tinymce-editor-init.focus', function( event, editor ) {
@@ -1128,7 +1166,7 @@
 
 				$document.on( 'dfw-on.focus', mceBind ).on( 'dfw-off.focus', mceUnbind );
 
-				// Make sure the body focusses when clicking outside it.
+				// Make sure the body focuses when clicking outside it.
 				editor.on( 'click', function( event ) {
 					if ( event.target === editor.getDoc().documentElement ) {
 						editor.focus();

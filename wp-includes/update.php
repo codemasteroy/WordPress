@@ -18,7 +18,7 @@
  *
  * @param array $extra_stats Extra statistics to report to the WordPress.org API.
  * @param bool $force_check Whether to bypass the transient cache and force a fresh update check. Defaults to false, true if $extra_stats is set.
- * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
+ * @return null|false Returns null if update is unsupported. Returns false if check is too soon.
  */
 function wp_version_check( $extra_stats = array(), $force_check = false ) {
 	if ( defined('WP_INSTALLING') )
@@ -180,7 +180,7 @@ function wp_version_check( $extra_stats = array(), $force_check = false ) {
  * @uses $wp_version Used to notify the WordPress version.
  *
  * @param array $extra_stats Extra statistics to report to the WordPress.org API.
- * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
+ * @return false|null Returns null if update is unsupported. Returns false if check is too soon.
  */
 function wp_update_plugins( $extra_stats = array() ) {
 	include( ABSPATH . WPINC . '/version.php' ); // include an unmodified $wp_version
@@ -334,7 +334,7 @@ function wp_update_plugins( $extra_stats = array() ) {
  * @uses $wp_version Used to notify the WordPress version.
  *
  * @param array $extra_stats Extra statistics to report to the WordPress.org API.
- * @return mixed Returns null if update is unsupported. Returns false if check is too soon.
+ * @return false|null Returns null if update is unsupported. Returns false if check is too soon.
  */
 function wp_update_themes( $extra_stats = array() ) {
 	include( ABSPATH . WPINC . '/version.php' ); // include an unmodified $wp_version
@@ -521,12 +521,14 @@ function wp_get_update_data() {
 	$counts = array( 'plugins' => 0, 'themes' => 0, 'wordpress' => 0, 'translations' => 0 );
 
 	if ( $plugins = current_user_can( 'update_plugins' ) ) {
+		wp_update_plugins(); // Check for Plugin updates
 		$update_plugins = get_site_transient( 'update_plugins' );
 		if ( ! empty( $update_plugins->response ) )
 			$counts['plugins'] = count( $update_plugins->response );
 	}
 
 	if ( $themes = current_user_can( 'update_themes' ) ) {
+		wp_update_themes(); // Check for Theme updates
 		$update_themes = get_site_transient( 'update_themes' );
 		if ( ! empty( $update_themes->response ) )
 			$counts['themes'] = count( $update_themes->response );

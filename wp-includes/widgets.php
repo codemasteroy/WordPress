@@ -109,6 +109,11 @@ class WP_Widget {
 
 	/**
 	 * PHP4 constructor
+	 * 
+	 * @param string $id_base
+	 * @param string $name
+	 * @param array  $widget_options
+	 * @param array  $control_options
 	 */
 	public function WP_Widget( $id_base, $name, $widget_options = array(), $control_options = array() ) {
 		WP_Widget::__construct( $id_base, $name, $widget_options, $control_options );
@@ -127,14 +132,18 @@ class WP_Widget {
 	}
 
 	/**
-	 * Constructs id attributes for use in form() fields
+	 * Constructs id attributes for use in {@see WP_Widget::form()} fields.
 	 *
-	 * This function should be used in form() methods to create id attributes for fields to be saved by update()
+	 * This function should be used in form() methods to create id attributes
+	 * for fields to be saved by {@see WP_Widget::update()}.
 	 *
-	 * @param string $field_name Field name
-	 * @return string ID attribute for $field_name
+	 * @since 2.8.0
+	 * @access public
+	 *
+	 * @param string $field_name Field name.
+	 * @return string ID attribute for `$field_name`.
 	 */
-	public function get_field_id($field_name) {
+	public function get_field_id( $field_name ) {
 		return 'widget-' . $this->id_base . '-' . $this->number . '-' . $field_name;
 	}
 
@@ -215,6 +224,7 @@ class WP_Widget {
 	 *
 	 * Finds the instance and calls {@see WP_Widget::widget()}.
 	 *
+	 * @since 2.8.0
 	 * @access public
 	 *
 	 * @param array     $args        Display arguments. See {@see WP_Widget::widget()} for information
@@ -268,11 +278,12 @@ class WP_Widget {
 	}
 
 	/**
-	 * Deal with changed settings.
+	 * Deal with changed settings (Do NOT override).
 	 *
-	 * Do NOT over-ride this function.
+	 * @since 2.8.0
+	 * @access public
 	 *
-	 * @param mixed $deprecated Not used.
+	 * @param int $deprecated Not used.
 	 */
 	public function update_callback( $deprecated = 1 ) {
 		global $wp_registered_widgets;
@@ -350,9 +361,12 @@ class WP_Widget {
 	}
 
 	/**
-	 * Generate the control form.
+	 * Generate the widget control form (Do NOT override).
 	 *
-	 * Do NOT over-ride this function.
+	 * @since 2.8.0
+	 * @access public
+	 *
+	 * @param int|array $widget_args Widget instance number or array of widget arguments.
 	 */
 	public function form_callback( $widget_args = 1 ) {
 		if ( is_numeric($widget_args) )
@@ -847,7 +861,7 @@ function wp_widget_description( $id ) {
  *
  * @since 2.9.0
  *
- * @param int|string $id sidebar ID.
+ * @param string $id sidebar ID.
  * @return string Sidebar description, if available. Null on failure to retrieve description.
  */
 function wp_sidebar_description( $id ) {
@@ -898,7 +912,6 @@ function wp_unregister_sidebar_widget($id) {
  * @param string $name Sidebar display name.
  * @param callback $control_callback Run when sidebar is displayed.
  * @param array|string $options Optional. Widget options. See above long description.
- * @param mixed $params,... Optional. Additional parameters to add to widget.
  */
 function wp_register_widget_control($id, $name, $control_callback, $options = array()) {
 	global $wp_registered_widget_controls, $wp_registered_widget_updates, $wp_registered_widgets, $_wp_deprecated_widgets_callbacks;
@@ -947,6 +960,13 @@ function wp_register_widget_control($id, $name, $control_callback, $options = ar
 	$wp_registered_widget_updates[$id_base] = $widget;
 }
 
+/**
+ *
+ * @global array $wp_registered_widget_updates
+ * @param string   $id_base
+ * @param callable $update_callback
+ * @param array    $options
+ */
 function _register_widget_update_callback($id_base, $update_callback, $options = array()) {
 	global $wp_registered_widget_updates;
 
@@ -965,6 +985,15 @@ function _register_widget_update_callback($id_base, $update_callback, $options =
 	$wp_registered_widget_updates[$id_base] = $widget;
 }
 
+/**
+ *
+ * @global array $wp_registered_widget_controls
+ * @param int|string $id
+ * @param string     $name
+ * @param callable   $form_callback
+ * @param array      $options
+ * @return null
+ */
 function _register_widget_form_callback($id, $name, $form_callback, $options = array()) {
 	global $wp_registered_widget_controls;
 
@@ -1249,7 +1278,7 @@ function is_dynamic_sidebar() {
  *
  * @since 2.8.0
  *
- * @param mixed $index Sidebar name, id or number to check.
+ * @param string|int $index Sidebar name, id or number to check.
  * @return bool true if the sidebar is in use, false otherwise.
  */
 function is_active_sidebar( $index ) {
@@ -1352,6 +1381,9 @@ function wp_get_widget_defaults() {
  *
  * @since 2.8.0
  *
+ * @param string $base_name
+ * @param string $option_name
+ * @param array  $settings
  * @return array
  */
 function wp_convert_widget_settings($base_name, $option_name, $settings) {
@@ -1470,8 +1502,8 @@ function _wp_sidebars_changed() {
  *
  * @since 2.8.0
  *
- * @param mixed $theme_changed Whether the theme was changed as a boolean. A value
- *                             of 'customize' defers updates for the Customizer.
+ * @param string|bool $theme_changed Whether the theme was changed as a boolean. A value
+ *                                   of 'customize' defers updates for the Customizer.
  * @return array
  */
 function retrieve_widgets( $theme_changed = false ) {

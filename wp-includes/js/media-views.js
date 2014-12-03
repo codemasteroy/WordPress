@@ -6405,7 +6405,7 @@
 								changed.push( model.save() );
 								removed.push( model );
 							} else {
-								model.destroy();
+								model.destroy({wait: true});
 							}
 						} );
 
@@ -6755,7 +6755,7 @@
 		events: {},
 		initialize: function() {
 			_.defaults( this.options, {
-				sortable:   true,
+				sortable:   false,
 				resize:     false,
 
 				// The single `Attachment` view to be used in the `Attachments` view.

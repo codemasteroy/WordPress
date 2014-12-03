@@ -459,7 +459,7 @@ function wp_dropdown_categories( $args = '' ) {
  * @since 2.1.0
  *
  * @param string|array $args Optional. Override default arguments.
- * @return string HTML content only if 'echo' argument is 0.
+ * @return false|null|string HTML content only if 'echo' argument is 0.
  */
 function wp_list_categories( $args = '' ) {
 	$defaults = array(
@@ -587,8 +587,8 @@ function wp_list_categories( $args = '' ) {
  *
  * @since 2.3.0
  *
- * @param array|string $args Optional. Override default arguments.
- * @return array Generated tag cloud, only if no failures and 'array' is set for the 'format' argument.
+ * @param array|string|null $args Optional. Override default arguments.
+ * @return null|false Generated tag cloud, only if no failures and 'array' is set for the 'format' argument.
  */
 function wp_tag_cloud( $args = '' ) {
 	$defaults = array(
@@ -1300,7 +1300,7 @@ function get_the_term_list( $id, $taxonomy, $before = '', $sep = '', $after = ''
 	/**
 	 * Filter the term links for a given taxonomy.
 	 *
-	 * The dynamic portion of the filter name, $taxonomy, refers
+	 * The dynamic portion of the filter name, `$taxonomy`, refers
 	 * to the taxonomy slug.
 	 *
 	 * @since 2.5.0
@@ -1322,7 +1322,7 @@ function get_the_term_list( $id, $taxonomy, $before = '', $sep = '', $after = ''
  * @param string $before Optional. Before list.
  * @param string $sep Optional. Separate items using this.
  * @param string $after Optional. After list.
- * @return null|bool False on WordPress error. Returns null when displaying.
+ * @return false|null False on WordPress error. Returns null when displaying.
  */
 function the_terms( $id, $taxonomy, $before = '', $sep = ', ', $after = '' ) {
 	$term_list = get_the_term_list( $id, $taxonomy, $before, $sep, $after );

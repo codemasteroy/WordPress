@@ -73,7 +73,7 @@ if ( !function_exists('get_currentuserinfo') ) :
  *
  * @uses $current_user Checks if the current user is set
  *
- * @return bool|null False on XML-RPC Request and invalid auth cookie. Null when current user set.
+ * @return null|false False on XML-RPC Request and invalid auth cookie. Null when current user set.
  */
 function get_currentuserinfo() {
 	global $current_user;
@@ -1064,8 +1064,8 @@ if ( !function_exists('check_admin_referer') ) :
  *
  * @since 1.2.0
  *
- * @param string $action Action nonce
- * @param string $query_arg where to look for nonce in $_REQUEST (since 2.5)
+ * @param int|string $action    Action nonce
+ * @param string     $query_arg Where to look for nonce in $_REQUEST (since 2.5)
  */
 function check_admin_referer($action = -1, $query_arg = '_wpnonce') {
 	if ( -1 == $action )
@@ -1098,8 +1098,8 @@ if ( !function_exists('check_ajax_referer') ) :
  *
  * @since 2.0.3
  *
- * @param string $action Action nonce
- * @param string $query_arg where to look for nonce in $_REQUEST (since 2.5)
+ * @param int|string $action    Action nonce
+ * @param string     $query_arg Where to look for nonce in $_REQUEST (since 2.5)
  */
 function check_ajax_referer( $action = -1, $query_arg = false, $die = true ) {
 	$nonce = '';
@@ -1190,7 +1190,7 @@ if ( !function_exists('wp_sanitize_redirect') ) :
  * @return string redirect-sanitized URL
  **/
 function wp_sanitize_redirect($location) {
-	$location = preg_replace('|[^a-z0-9-~+_.?#=&;,/:%!*]|i', '', $location);
+	$location = preg_replace('|[^a-z0-9-~+_.?#=&;,/:%!*\[\]()]|i', '', $location);
 	$location = wp_kses_no_null($location);
 
 	// remove %0d and %0a from location
@@ -1666,7 +1666,7 @@ if ( !function_exists('wp_nonce_tick') ) :
  *
  * @since 2.5.0
  *
- * @return int
+ * @return float Float value rounded up to the next highest integer.
  */
 function wp_nonce_tick() {
 	/**
@@ -1691,11 +1691,12 @@ if ( !function_exists('wp_verify_nonce') ) :
  *
  * @since 2.0.3
  *
- * @param string $nonce Nonce that was used in the form to verify
+ * @param string     $nonce  Nonce that was used in the form to verify
  * @param string|int $action Should give context to what is taking place and be the same when nonce was created.
  * @return bool Whether the nonce check passed or failed.
  */
-function wp_verify_nonce($nonce, $action = -1) {
+function wp_verify_nonce( $nonce, $action = -1 ) {
+	$nonce = (string) $nonce;
 	$user = wp_get_current_user();
 	$uid = (int) $user->ID;
 	if ( ! $uid ) {
@@ -1740,7 +1741,7 @@ if ( !function_exists('wp_create_nonce') ) :
  *
  * @since 2.0.3
  *
- * @param string $action Scalar value to add context to the nonce.
+ * @param string|int $action Scalar value to add context to the nonce.
  * @return string The token.
  */
 function wp_create_nonce($action = -1) {
@@ -1974,12 +1975,13 @@ if ( !function_exists('wp_generate_password') ) :
  *
  * @since 2.5.0
  *
- * @param int $length The length of password to generate
- * @param bool $special_chars Whether to include standard special characters. Default true.
- * @param bool $extra_special_chars Whether to include other special characters. Used when
- *   generating secret keys and salts. Default false.
- * @return string The random password
- **/
+ * @param int  $length              Optional. The length of password to generate. Default 12.
+ * @param bool $special_chars       Optional. Whether to include standard special characters.
+ *                                  Default true.
+ * @param bool $extra_special_chars Optional. Whether to include other special characters.
+ *                                  Used when generating secret keys and salts. Default false.
+ * @return string The random password.
+ */
 function wp_generate_password( $length = 12, $special_chars = true, $extra_special_chars = false ) {
 	$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	if ( $special_chars )
@@ -2088,7 +2090,7 @@ if ( !function_exists( 'get_avatar' ) ) :
  * @param int $size Size of the avatar image
  * @param string $default URL to a default image to use if no avatar is available
  * @param string $alt Alternative text to use in image tag. Defaults to blank
- * @return string `<img>` tag for the user's avatar.
+ * @return false|string `<img>` tag for the user's avatar.
 */
 function get_avatar( $id_or_email, $size = '96', $default = '', $alt = false ) {
 	if ( ! get_option('show_avatars') )

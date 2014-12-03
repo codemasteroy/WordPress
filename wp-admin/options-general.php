@@ -30,10 +30,11 @@ function options_general_add_js() {
 <script type="text/javascript">
 //<![CDATA[
 	jQuery(document).ready(function($){
-		var $siteName = $( '#wp-admin-bar-site-name' ).children( 'a' ).first();
+		var $siteName = $( '#wp-admin-bar-site-name' ).children( 'a' ).first(),
+			homeURL = ( <?php echo wp_json_encode( get_home_url() ); ?> || '' ).replace( /^(https?:\/\/)?(www\.)?/, '' );
 
 		$( '#blogname' ).on( 'input', function() {
-			var title = $( this ).val();
+			var title = $.trim( $( this ).val() ) || homeURL;
 
 			// Truncate to 40 characters.
 			if ( 40 < title.length ) {
@@ -90,7 +91,8 @@ if ( ! is_multisite() ) {
 		'<p>' . __('If you want site visitors to be able to register themselves, as opposed to by the site administrator, check the membership box. A default user role can be set for all new users, whether self-registered or registered by the site admin.') . '</p>';
 }
 
-$options_help .= '<p>' . __('UTC means Coordinated Universal Time.') . '</p>' .
+$options_help .= '<p>' . __( 'You can set the language, and the translation files will be automatically downloaded and installed (available if your filesystem is writable).' ) . '</p>' .
+	'<p>' . __( 'UTC means Coordinated Universal Time.' ) . '</p>' .
 	'<p>' . __( 'You must click the Save Changes button at the bottom of the screen for new settings to take effect.' ) . '</p>';
 
 get_current_screen()->add_help_tab( array(

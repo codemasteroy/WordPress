@@ -403,7 +403,7 @@ function get_inline_data($post) {
  *
  * @since 2.7.0
  *
- * @param string|int $position
+ * @param int $position
  * @param bool $checkbox
  * @param string $mode
  * @param bool $table_row
@@ -707,10 +707,10 @@ function meta_form( $post = null ) {
  *
  * @since 0.71
  *
- * @param int|bool $edit      Accepts 1|true for editing the date, 0|false for adding the date.
- * @param int|bool $for_post  Accepts 1|true for applying the date to a post, 0|false for a comment.
- * @param int|bool $tab_index The tabindex attribute to add. Default 0.
- * @param int|bool $multi     Optional. Whether the additional fields and buttons should be added.
+ * @param int $edit      Accepts 1|true for editing the date, 0|false for adding the date.
+ * @param int $for_post  Accepts 1|true for applying the date to a post, 0|false for a comment.
+ * @param int $tab_index The tabindex attribute to add. Default 0.
+ * @param int $multi     Optional. Whether the additional fields and buttons should be added.
  *                            Default 0|false.
  */
 function touch_time( $edit = 1, $for_post = 1, $tab_index = 0, $multi = 0 ) {
@@ -813,7 +813,7 @@ function page_template_dropdown( $default = '' ) {
  * @param int $parent  Optional. The parent page ID. Default 0.
  * @param int $level   Optional. Page depth level. Default 0.
  *
- * @return void|bool Boolean False if page has no children, otherwise print out html elements
+ * @return null|false Boolean False if page has no children, otherwise print out html elements
  */
 function parent_dropdown( $default = 0, $parent = 0, $level = 0 ) {
 	global $wpdb;
@@ -992,7 +992,8 @@ function add_meta_box( $id, $title, $callback, $screen = null, $context = 'advan
  *
  * @since 2.5.0
  *
- * @param string|object $screen Screen identifier
+ * @staticvar bool $already_sorted
+ * @param string|WP_Screen $screen Screen identifier
  * @param string $context box context
  * @param mixed $object gets passed to the box callback function as first parameter
  * @return int number of meta_boxes
@@ -1607,7 +1608,7 @@ document.body.className = c;
 function iframe_footer() {
 	/*
 	 * We're going to hide any footer output on iFrame pages,
-	 * but run the hooks anyway since they output Javascript
+	 * but run the hooks anyway since they output JavaScript
 	 * or other needed content.
 	 */
 	 ?>
@@ -1905,8 +1906,8 @@ final class WP_Internal_Pointers {
 		 */
 
 		$registered_pointers = array(
-			'post-new.php' => 'wp350_media',
-			'post.php'     => array( 'wp350_media', 'wp360_revisions' ),
+			'post-new.php' => 'wp410_dfw',
+			'post.php'     => 'wp410_dfw',
 			'edit.php'     => 'wp360_locks',
 			'widgets.php'  => 'wp390_widgets',
 			'themes.php'   => 'wp390_widgets',
@@ -1919,7 +1920,6 @@ final class WP_Internal_Pointers {
 		$pointers = (array) $registered_pointers[ $hook_suffix ];
 
 		$caps_required = array(
-			'wp350_media' => array( 'upload_files' ),
 			'wp390_widgets' => array( 'edit_theme_options' ),
 		);
 
@@ -1949,7 +1949,7 @@ final class WP_Internal_Pointers {
 	}
 
 	/**
-	 * Print the pointer javascript data.
+	 * Print the pointer JavaScript data.
 	 *
 	 * @since 3.3.0
 	 *
@@ -1999,26 +1999,8 @@ final class WP_Internal_Pointers {
 	public static function pointer_wp330_saving_widgets() {}
 	public static function pointer_wp340_customize_current_theme_link() {}
 	public static function pointer_wp340_choose_image_from_library() {}
-
-	public static function pointer_wp350_media() {
-		$content  = '<h3>' . __( 'New Media Manager' ) . '</h3>';
-		$content .= '<p>' . __( 'Uploading files and creating image galleries has a whole new look. Check it out!' ) . '</p>';
-
-		self::print_js( 'wp350_media', '.insert-media', array(
-			'content'  => $content,
-			'position' => array( 'edge' => is_rtl() ? 'right' : 'left', 'align' => 'center' ),
-		) );
-	}
-
-	public static function pointer_wp360_revisions() {
-		$content  = '<h3>' . __( 'Compare Revisions' ) . '</h3>';
-		$content .= '<p>' . __( 'View, compare, and restore other versions of this content on the improved revisions screen.' ) . '</p>';
-
-		self::print_js( 'wp360_revisions', '.misc-pub-section.misc-pub-revisions', array(
-			'content' => $content,
-			'position' => array( 'edge' => is_rtl() ? 'left' : 'right', 'align' => 'center' ),
-		) );
-	}
+	public static function pointer_wp350_media() {}
+	public static function pointer_wp360_revisions() {}
 
 	public static function pointer_wp360_locks() {
 		if ( ! is_multi_author() ) {
@@ -2060,13 +2042,35 @@ final class WP_Internal_Pointers {
 		) );
 	}
 
+	public static function pointer_wp410_dfw() {
+		// Don't show when editor-scrolling is not used.
+		if ( empty( $GLOBALS['_wp_editor_expand'] ) ) {
+			return;
+		}
+
+		$content  = '<h3>' . __( 'Distraction Free Writing' ) . '</h3>';
+		$content .= '<p>' . __( 'Start typing, and the other elements fade away so you can focus. '
+			. 'Move your mouse out of the editor to reveal everything again.' ) . '</p>';
+
+		if ( is_rtl() ) {
+			$position = array( 'edge' => 'left', 'align' => 'left', 'my' => 'left-5 top-30%' );
+		} else {
+			$position = array( 'edge' => 'right', 'align' => 'right', 'my' => 'right+5 top-30%' );
+		}
+
+		self::print_js( 'wp410_dfw', '#content-html', array(
+			'content' => $content,
+			'position' => $position,
+		) );
+	}
+
 	/**
 	 * Prevents new users from seeing existing 'new feature' pointers.
 	 *
 	 * @since 3.3.0
 	 */
 	public static function dismiss_pointers_for_new_users( $user_id ) {
-		add_user_meta( $user_id, 'dismissed_wp_pointers', 'wp350_media,wp360_revisions,wp360_locks,wp390_widgets' );
+		add_user_meta( $user_id, 'dismissed_wp_pointers', 'wp360_locks,wp390_widgets' );
 	}
 }
 

@@ -325,7 +325,7 @@ final class WP_Customize_Widgets {
 	 * @since 3.9.0
 	 * @access public
 	 *
-	 * @param array $sidebars_widgets
+	 * @param array $old_sidebars_widgets
 	 */
 	public function filter_customize_value_old_sidebars_widgets_data( $old_sidebars_widgets ) {
 		return $this->old_sidebars_widgets;
@@ -1041,7 +1041,7 @@ final class WP_Customize_Widgets {
 	 */
 	public function export_preview_data() {
 
-		// Prepare Customizer settings to pass to Javascript.
+		// Prepare Customizer settings to pass to JavaScript.
 		$settings = array(
 			'renderedSidebars'   => array_fill_keys( array_unique( $this->rendered_sidebars ), true ),
 			'renderedWidgets'    => array_fill_keys( array_keys( $this->rendered_widgets ), true ),

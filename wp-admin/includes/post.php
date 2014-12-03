@@ -555,6 +555,7 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 		$post->post_date = '';
 		$post->post_date_gmt = '';
 		$post->post_password = '';
+		$post->post_name = '';
 		$post->post_type = $post_type;
 		$post->post_status = 'draft';
 		$post->to_ping = '';
@@ -598,7 +599,6 @@ function get_default_post_to_edit( $post_type = 'post', $create_in_db = false ) 
 	 * @param WP_Post $post         Post object.
 	 */
 	$post->post_excerpt = apply_filters( 'default_excerpt', $post_excerpt, $post );
-	$post->post_name = '';
 
 	return $post;
 }
@@ -965,7 +965,7 @@ function wp_edit_posts_query( $q = false ) {
 	/**
 	 * Filter the number of items per page to show for a specific 'per_page' type.
 	 *
-	 * The dynamic portion of the hook name, $post_type, refers to the post type.
+	 * The dynamic portion of the hook name, `$post_type`, refers to the post type.
 	 *
 	 * Some examples of filter hooks generated here include: 'edit_attachment_per_page',
 	 * 'edit_post_per_page', 'edit_page_per_page', etc.
@@ -1104,8 +1104,8 @@ function postbox_classes( $id, $page ) {
 	/**
 	 * Filter the postbox classes for a specific screen and screen ID combo.
 	 *
-	 * The dynamic portions of the hook name, $page, and $id, refer to
-	 * the screen, and screen ID, respectively.
+	 * The dynamic portions of the hook name, `$page` and `$id`, refer to
+	 * the screen and screen ID, respectively.
 	 *
 	 * @since 3.2.0
 	 *
@@ -1120,7 +1120,7 @@ function postbox_classes( $id, $page ) {
  *
  * @since 2.5.0
  *
- * @param int|object $id    Post ID or post object.
+ * @param integer $id    Post ID or post object.
  * @param string $title (optional) Title
  * @param string $name (optional) Name
  * @return array With two entries of type string
@@ -1185,7 +1185,7 @@ function get_sample_permalink($id, $title = null, $name = null) {
  *
  * @since 2.5.0
  *
- * @param int|object $id Post ID or post object.
+ * @param integer $id Post ID or post object.
  * @param string $new_title Optional. New title.
  * @param string $new_slug Optional. New slug.
  * @return string The HTML of the sample permalink slug editor.
@@ -1308,7 +1308,7 @@ function _wp_post_thumbnail_html( $thumbnail_id = null, $post = null ) {
  * @since 2.5.0
  *
  * @param int $post_id ID of the post to check for editing
- * @return bool|int False: not locked or locked by current user. Int: user ID of user with lock.
+ * @return integer False: not locked or locked by current user. Int: user ID of user with lock.
  */
 function wp_check_post_lock( $post_id ) {
 	if ( !$post = get_post( $post_id ) )
@@ -1629,7 +1629,7 @@ function post_preview() {
  *
  * @since 3.9.0
  *
- * @param $post_data Associative array of the submitted post data.
+ * @param array $post_data Associative array of the submitted post data.
  * @return mixed The value 0 or WP_Error on failure. The saved post ID on success.
  *               Te ID can be the draft post_id or the autosave revision post_id.
  */
