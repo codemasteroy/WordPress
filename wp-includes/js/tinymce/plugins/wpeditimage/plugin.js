@@ -302,6 +302,12 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		}, delay );
 	} );
 
+	function hide() {
+		if ( ! toolbarIsHidden ) {
+			floatingToolbar.hide();
+		}
+	}
+
 	floatingToolbar.on( 'show', function() {
 		var self = this;
 
@@ -320,11 +326,12 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 		DOM.removeClass( this.getEl(), 'mce-inline-toolbar-grp-active' );
 	} );
 
-	function hide() {
-		if ( ! toolbarIsHidden ) {
-			floatingToolbar.hide();
+	floatingToolbar.on( 'keydown', function( event ) {
+		if ( event.keyCode === 27 ) {
+			hide();
+			editor.focus();
 		}
-	}
+	} );
 
 	DOM.bind( window, 'resize scroll', function() {
 		if ( ! toolbarIsHidden && editorWrapParent.hasClass( 'wp-editor-expand' ) ) {
@@ -335,7 +342,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	editor.on( 'init', function() {
 		editor.dom.bind( editor.getWin(), 'scroll', hide );
 	});
-	
+
 	editor.on( 'blur hide', hide );
 
 	// 119 = F8
@@ -1124,6 +1131,12 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 			if ( floatingToolbar ) {
 				floatingToolbar.reposition();
 			}
+
+			editor.fire( 'ExecCommand', {
+				command: cmd,
+				ui: event.ui,
+				value: event.value
+			} );
 		}
 	});
 

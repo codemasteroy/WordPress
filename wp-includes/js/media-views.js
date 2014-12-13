@@ -2395,6 +2395,7 @@
 			}, this );
 
 			this.on( 'content:create:iframe', this.iframeContent, this );
+			this.on( 'content:deactivate:iframe', this.iframeContentCleanup, this );
 			this.on( 'menu:render:default', this.iframeMenu, this );
 			this.on( 'open', this.hijackThickbox, this );
 			this.on( 'close', this.restoreThickbox, this );
@@ -2409,6 +2410,10 @@
 			content.view = new media.view.Iframe({
 				controller: this
 			});
+		},
+
+		iframeContentCleanup: function() {
+			this.$el.removeClass('hide-toolbar');
 		},
 
 		iframeMenu: function( view ) {
@@ -5243,14 +5248,13 @@
 				return;
 			}
 
+			event.preventDefault();
+
 			// In the grid view, bubble up an edit:attachment event to the controller.
 			if ( this.controller.isModeActive( 'grid' ) ) {
 				if ( this.controller.isModeActive( 'edit' ) ) {
 					// Pass the current target to restore focus when closing
 					this.controller.trigger( 'edit:attachment', this.model, event.currentTarget );
-
-					// Don't scroll the view and don't attempt to submit anything.
-					event.stopPropagation();
 					return;
 				}
 
@@ -5270,9 +5274,6 @@
 			});
 
 			this.controller.trigger( 'selection:toggle' );
-
-			// Don't scroll the view and don't attempt to submit anything.
-			event.stopPropagation();
 		},
 		/**
 		 * @param {Object} options
