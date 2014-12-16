@@ -101,30 +101,22 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 
 		if ( is_file( $this->file ) ) {
 			$this->image = @imagecreatefromstring( file_get_contents( $this->file ) );
-
-			if ( ! is_resource( $this->image ) )
-				return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
-
-			$size = @getimagesize( $this->file );
-			if ( ! $size )
-				return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
-
 		} else {
 			$response = wp_remote_get( $this->file );
 			if ( is_wp_error( $response ) ) {
 				return new WP_Error( 'invalid_image', __('Failed to download the image.'), $this->file );
 			} else {
 				$this->image = @imagecreatefromstring( $response['body'] );
+				$this->file = 'data://application/octet-stream;base64,'  . base64_encode( $response['body'] );
 			}
-
-			if ( ! is_resource( $this->image ) )
-				return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
-
-			$size = @getimagesizefromstring( $response['body'] );
-			if ( ! $size )
-				return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
-			
 		}
+		
+		if ( ! is_resource( $this->image ) )
+			return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
+
+		$size = @getimagesize( $this->file );
+		if ( ! $size )
+			return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
 
 		if ( function_exists( 'imagealphablending' ) && function_exists( 'imagesavealpha' ) ) {
 			imagealphablending( $this->image, false );
