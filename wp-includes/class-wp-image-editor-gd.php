@@ -99,8 +99,17 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 		// Set artificially high because GD uses uncompressed images in memory
 		@ini_set( 'memory_limit', apply_filters( 'image_memory_limit', WP_MAX_MEMORY_LIMIT ) );
 
-		$this->image = @imagecreatefromstring( file_get_contents( $this->file ) );
-
+		if ( is_file() ) {
+			$this->image = @imagecreatefromstring( file_get_contents( $this->file ) );
+		} else {
+			$response = wp_remote_get( $this->file );
+			if ( is_wp_error( $response ) ) {
+				return new WP_Error( 'invalid_image', __('Failed to download the image.'), $this->file );
+			} else {
+				$this->image = @imagecreatefromstring( $response['body'] );
+			}
+		}
+		
 		if ( ! is_resource( $this->image ) )
 			return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
 
