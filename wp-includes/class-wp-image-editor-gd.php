@@ -99,8 +99,16 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 		// Set artificially high because GD uses uncompressed images in memory
 		@ini_set( 'memory_limit', apply_filters( 'image_memory_limit', WP_MAX_MEMORY_LIMIT ) );
 
-		if ( is_file() ) {
+		if ( is_file( $this->file ) ) {
 			$this->image = @imagecreatefromstring( file_get_contents( $this->file ) );
+
+			if ( ! is_resource( $this->image ) )
+				return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
+
+			$size = @getimagesize( $this->file );
+			if ( ! $size )
+				return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
+
 		} else {
 			$response = wp_remote_get( $this->file );
 			if ( is_wp_error( $response ) ) {
@@ -108,14 +116,15 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 			} else {
 				$this->image = @imagecreatefromstring( $response['body'] );
 			}
-		}
-		
-		if ( ! is_resource( $this->image ) )
-			return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
 
-		$size = @getimagesize( $this->file );
-		if ( ! $size )
-			return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
+			if ( ! is_resource( $this->image ) )
+				return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
+
+			$size = @getimagesizefromstring( $response['body'] );
+			if ( ! $size )
+				return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
+			
+		}
 
 		if ( function_exists( 'imagealphablending' ) && function_exists( 'imagesavealpha' ) ) {
 			imagealphablending( $this->image, false );
