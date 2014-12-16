@@ -104,23 +104,31 @@ class WP_Image_Editor_GD extends WP_Image_Editor {
 			if ( is_wp_error( $response ) ) {
 				return new WP_Error( 'invalid_image', __('Failed to download the image.'), $this->file );
 			} else {
-				$temp_handle = tmpfile();
-				$meta_data = stream_get_meta_data($temp_handle);
+				$this->image = @imagecreatefromstring( $response['body'] );
+				if ( ! is_resource( $this->image ) )
+					return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
 
-				fwrite( $temp_handle, $response['body'] );
-				fclose( $temp_handle ); 
+				$upload_dir = wp_upload_dir();
+
+				$file = tempnam( $upload_dir['path'], 'gd' );
+				file_put_contents( $file, $response['body'] );
 				
-				$this->file = $meta_data["uri"];
-			}
-		}
-		
-		$this->image = @imagecreatefromstring( file_get_contents( $this->file ) );
-		if ( ! is_resource( $this->image ) )
-			return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
+				$size = @getimagesize( $file );
 
-		$size = @getimagesize( $this->file );
-		if ( ! $size )
-			return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
+				@unlink( $file );
+				
+				if ( ! $size )
+					return new WP_Error( 'invalid_image', __('Could not read image size.'.print_r($size)), $this->file );
+			}
+		} else {
+			$this->image = @imagecreatefromstring( file_get_contents( $this->file ) );
+			if ( ! is_resource( $this->image ) )
+				return new WP_Error( 'invalid_image', __('File is not an image.'), $this->file );
+
+			$size = @getimagesize( $this->file );
+			if ( ! $size )
+				return new WP_Error( 'invalid_image', __('Could not read image size.'), $this->file );
+		}
 
 		if ( function_exists( 'imagealphablending' ) && function_exists( 'imagesavealpha' ) ) {
 			imagealphablending( $this->image, false );
