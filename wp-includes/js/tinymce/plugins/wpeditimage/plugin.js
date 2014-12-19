@@ -22,7 +22,7 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	} );
 
 	editor.addButton( 'wp_img_edit', {
-		tooltip: 'Edit',
+		tooltip: 'Edit ', // trailing space is needed, used for context
 		icon: 'dashicon dashicons-edit',
 		onclick: function() {
 			editImage( editor.selection.getNode() );
@@ -309,16 +309,12 @@ tinymce.PluginManager.add( 'wpeditimage', function( editor ) {
 	}
 
 	floatingToolbar.on( 'show', function() {
-		var self = this;
-
 		toolbarIsHidden = false;
 
-		setTimeout( function() {
-			if ( self._visible ) {
-				DOM.addClass( self.getEl(), 'mce-inline-toolbar-grp-active' );
-				self.reposition();
-			}
-		}, 100 );
+		if ( this._visible ) {
+			this.reposition();
+			DOM.addClass( this.getEl(), 'mce-inline-toolbar-grp-active' );
+		}
 	} );
 
 	floatingToolbar.on( 'hide', function() {

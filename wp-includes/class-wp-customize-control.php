@@ -687,6 +687,8 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 		$this->json['mime_type'] = $this->mime_type;
 		$this->json['button_labels'] = $this->button_labels;
 
+		$value = $this->value();
+
 		if ( is_object( $this->setting ) ) {
 			if ( $this->setting->default ) {
 				// Fake an attachment model - needs all fields used by template.
@@ -695,24 +697,28 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 					'id' => 1,
 					'url' => $this->setting->default,
 					'type' => $type,
-					'sizes' => array(
-						'full' => array( 'url' => $this->setting->default ),
-					),
 					'icon' => wp_mime_type_icon( $type ),
 					'title' => basename( $this->setting->default ),
 				);
+
+				if ( 'image' === $type ) {
+					$default_attachment['sizes'] = array(
+						'full' => array( 'url' => $this->setting->default ),
+					);
+				}
+
 				$this->json['defaultAttachment'] = $default_attachment;
 			}
 
-			// Get the attachment model for the existing file.
-			if ( $this->value() ) {
-				$attachment_id = attachment_url_to_postid( $this->value() );
-				if ( $attachment_id ) {
-					$this->json['attachment'] = wp_prepare_attachment_for_js( $attachment_id);
-				}
-			} else if ( $this->setting->default ) {
+			if ( $value && $this->setting->default && $value === $this->setting->default ) {
 				// Set the default as the attachment.
-				$this->json['attachment'] = $default_attachment;
+				$this->json['attachment'] = $this->json['defaultAttachment'];
+			} elseif ( $value ) {
+				// Get the attachment model for the existing file.
+				$attachment_id = attachment_url_to_postid( $value );
+				if ( $attachment_id ) {
+					$this->json['attachment'] = wp_prepare_attachment_for_js( $attachment_id );
+				}
 			}
 		}
 	}
@@ -737,16 +743,11 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 				<span class="customize-control-title">{{ data.label }}</span>
 			<# } #>
 			<# if ( data.description ) { #>
-				<span class="description customize-control-description">{{ data.description }}</span>
+				<span class="description customize-control-description">{{{ data.description }}}</span>
 			<# } #>
 		</label>
 
-		<# // Ensure that the default attachment is used if it exists.
-		if ( _.isEmpty( data.attachment ) && data.defaultAttachment ) {
-			data.attachment = data.defaultAttachment;
-		}
-
-		if ( data.attachment && data.attachment.id ) { #>
+		<# if ( data.attachment && data.attachment.id ) { #>
 			<div class="current">
 				<div class="container">
 					<div class="attachment-media-view attachment-media-view-{{ data.attachment.type }} {{ data.attachment.orientation }}">
@@ -773,11 +774,7 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 				</div>
 			</div>
 			<div class="actions">
-				<# if ( data.defaultAttachment && data.defaultAttachment.id !== data.attachment.id ) { #>
-					<button type="button" class="button default-button remove-button"><?php echo $this->button_labels['default']; ?></button>
-				<# } else if ( ! data.defaultAttachment ) { #>
-					<button type="button" class="button remove-button"><?php echo $this->button_labels['remove']; ?></button>
-				<# } #>
+				<button type="button" class="button remove-button"><?php echo $this->button_labels['remove']; ?></button>
 				<button type="button" class="button upload-button" id="{{ data.settings.default }}-button"><?php echo $this->button_labels['change']; ?></button>
 				<div style="clear:both"></div>
 			</div>
@@ -795,7 +792,7 @@ class WP_Customize_Upload_Control extends WP_Customize_Control {
 			</div>
 			<div class="actions">
 				<# if ( data.defaultAttachment ) { #>
-					<button type="button" class="button default-button remove-button"><?php echo $this->button_labels['default']; ?></button>
+					<button type="button" class="button default-button"><?php echo $this->button_labels['default']; ?></button>
 				<# } #>
 				<button type="button" class="button upload-button" id="{{ data.settings.default }}-button"><?php echo $this->button_labels['select']; ?></button>
 				<div style="clear:both"></div>
@@ -882,6 +879,7 @@ class WP_Customize_Image_Control extends WP_Customize_Upload_Control {
  * @since 3.4.0
  */
 class WP_Customize_Background_Image_Control extends WP_Customize_Image_Control {
+	public $type = 'background';
 
 	/**
 	 * Constructor.
@@ -895,6 +893,21 @@ class WP_Customize_Background_Image_Control extends WP_Customize_Image_Control {
 		parent::__construct( $manager, 'background_image', array(
 			'label'    => __( 'Background Image' ),
 			'section'  => 'background_image',
+		) );
+	}
+
+	/**
+	 * Enqueue control related scripts/styles.
+	 *
+	 * @since 4.1.0
+	 */
+	public function enqueue() {
+		parent::enqueue();
+
+		wp_localize_script( 'customize-controls', '_wpCustomizeBackground', array(
+			'nonces' => array(
+				'add' => wp_create_nonce( 'background-add' ),
+			),
 		) );
 	}
 }
@@ -915,7 +928,6 @@ class WP_Customize_Header_Image_Control extends WP_Customize_Image_Control {
 				'data'    => 'header_image_data',
 			),
 			'section'  => 'header_image',
-			'context'  => 'custom-header',
 			'removed'  => 'remove-header',
 			'get_url'  => 'get_header_image',
 		) );

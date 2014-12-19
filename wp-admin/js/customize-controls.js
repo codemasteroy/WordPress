@@ -1,4 +1,4 @@
-/* globals _wpCustomizeHeader, _wpMediaViewsL10n */
+/* globals _wpCustomizeHeader, _wpCustomizeBackground, _wpMediaViewsL10n */
 (function( exports, $ ){
 	var Container, focus, api = wp.customize;
 
@@ -252,7 +252,9 @@
 			if ( ! $.contains( document, this.container ) ) {
 				// jQuery.fn.slideUp is not hiding an element if it is not in the DOM
 				this.container.toggle( active );
-				args.completeCallback();
+				if ( args.completeCallback ) {
+					args.completeCallback();
+				}
 			} else if ( active ) {
 				this.container.stop( true, true ).slideDown( duration, args.completeCallback );
 			} else {
@@ -820,7 +822,7 @@
 			// Watch for changes to the section state
 			inject = function ( sectionId ) {
 				var parentContainer;
-				if ( ! sectionId ) { // @todo allow a control to be embeded without a section, for instance a control embedded in the frontend
+				if ( ! sectionId ) { // @todo allow a control to be embedded without a section, for instance a control embedded in the frontend
 					return;
 				}
 				// Wait for the section to be registered
@@ -878,7 +880,9 @@
 			if ( ! $.contains( document, this.container ) ) {
 				// jQuery.fn.slideUp is not hiding an element if it is not in the DOM
 				this.container.toggle( active );
-				args.completeCallback();
+				if ( args.completeCallback ) {
+					args.completeCallback();
+				}
 			} else if ( active ) {
 				this.container.slideDown( args.duration, args.completeCallback );
 			} else {
@@ -912,6 +916,13 @@
 		 * @returns {Boolean} false if already inactive
 		 */
 		deactivate: Container.prototype.deactivate,
+
+		/**
+		 * Re-use _toggleActive from Container class.
+		 *
+		 * @access private
+		 */
+		_toggleActive: Container.prototype._toggleActive,
 
 		dropdownInit: function() {
 			var control      = this,
@@ -1049,18 +1060,17 @@
 		 */
 		initFrame: function() {
 			this.frame = wp.media({
-				// The title of the media modal.
-				title: this.params.button_labels.frame_title,
-
-				// Restrict the library to specified mime type.
-				library: {
-					type: this.params.mime_type
-				},
 				button: {
-					// Change the submit button label.
 					text: this.params.button_labels.frame_button
 				},
-				multiple: false
+				states: [
+					new wp.media.controller.Library({
+						title:     this.params.button_labels.frame_title,
+						library:   wp.media.query({ type: this.params.mime_type }),
+						multiple:  false,
+						date:      false
+					})
+				]
 			});
 
 			// When a file is selected, run a callback.
@@ -1131,6 +1141,40 @@
 	api.ImageControl = api.UploadControl.extend({
 		// @deprecated
 		thumbnailSrc: function() {}
+	});
+
+	/**
+	 * A control for uploading background images.
+	 *
+	 * @class
+	 * @augments wp.customize.UploadControl
+	 * @augments wp.customize.Control
+	 * @augments wp.customize.Class
+	 */
+	api.BackgroundControl = api.UploadControl.extend({
+
+		/**
+		 * When the control's DOM structure is ready,
+		 * set up internal event bindings.
+		 */
+		ready: function() {
+			api.UploadControl.prototype.ready.apply( this, arguments );
+		},
+
+		/**
+		 * Callback handler for when an attachment is selected in the media modal.
+		 * Does an additional AJAX request for setting the background context.
+		 */
+		select: function() {
+			api.UploadControl.prototype.select.apply( this, arguments );
+
+			wp.ajax.post( 'custom-background-add', {
+				nonce: _wpCustomizeBackground.nonces.add,
+				wp_customize: 'on',
+				theme: api.settings.theme.stylesheet,
+				attachment_id: this.params.attachment.id
+			} );
+		}
 	});
 
 	/**
@@ -1264,6 +1308,7 @@
 						title:     l10n.chooseImage,
 						library:   wp.media.query({ type: 'image' }),
 						multiple:  false,
+						date:      false,
 						priority:  20,
 						suggestedWidth: _wpCustomizeHeader.data.width,
 						suggestedHeight: _wpCustomizeHeader.data.height
@@ -1811,7 +1856,8 @@
 		color:  api.ColorControl,
 		upload: api.UploadControl,
 		image:  api.ImageControl,
-		header: api.HeaderControl
+		header: api.HeaderControl,
+		background: api.BackgroundControl
 	};
 	api.panelConstructor = {};
 	api.sectionConstructor = {};

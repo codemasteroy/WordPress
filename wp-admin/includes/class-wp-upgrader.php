@@ -1845,7 +1845,7 @@ class Language_Pack_Upgrader extends WP_Upgrader {
 		remove_filter( 'upgrader_source_selection', array( $this, 'check_package' ) );
 
 		if ( $parsed_args['clear_update_cache'] ) {
-			_wp_clear_update_cache();
+			wp_clean_update_cache();
 		}
 
 		return $results;
@@ -2076,6 +2076,7 @@ class Core_Upgrader extends WP_Upgrader {
 				'success'          => true,
 				'fs_method'        => $wp_filesystem->method,
 				'fs_method_forced' => defined( 'FS_METHOD' ) || has_filter( 'filesystem_method' ),
+				'fs_method_direct' => !empty( $GLOBALS['_wp_filesystem_direct_method'] ) ? $GLOBALS['_wp_filesystem_direct_method'] : '',
 				'time_taken'       => time() - $start_time,
 				'reported'         => $wp_version,
 				'attempted'        => $current->version,
@@ -2776,7 +2777,7 @@ class WP_Automatic_Updater {
 			}
 
 			// Clear existing caches
-			_wp_clear_update_cache();
+			wp_clean_update_cache();
 
 			wp_version_check();  // check for Core updates
 			wp_update_themes();  // Check for Theme updates
