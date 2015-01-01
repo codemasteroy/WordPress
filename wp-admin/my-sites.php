@@ -20,12 +20,19 @@ $action = isset( $_POST['action'] ) ? $_POST['action'] : 'splash';
 $blogs = get_blogs_of_user( $current_user->ID );
 
 $updated = false;
-if ( 'updateblogsettings' == $action && isset( $_POST['primary_blog'] ) ) {
+if ( 'updateblogsettings' == $action && ( isset( $_POST['primary_blog'] ) || isset( $_POST['primary_blog_name'] ) ) ) {
 	check_admin_referer( 'update-my-sites' );
 
-	$blog = get_blog_details( (int) $_POST['primary_blog'] );
+	if ( isset( $_POST['primary_blog'] ) && inval( $_POST['primary_blog'] ) > 0 ) {
+		$blog = get_blog_details( (int) $_POST['primary_blog'] );
+	} elseif ( isset( $_POST['primary_blog_name'] ) && !empty( $_POST['primary_blog_name'] ) ) {
+		$site_url_parts = parse_url( $_POST['primary_blog_name'] );
+		if ( $site_url_parts ) {
+			$blog = get_site_by_path( $site_url_parts['host'], $site_url_parts['path'] );
+		}
+	}
 	if ( $blog && isset( $blog->domain ) ) {
-		update_user_option( $current_user->ID, 'primary_blog', (int) $_POST['primary_blog'], true );
+		update_user_option( $current_user->ID, 'primary_blog', $blog->blog_id, true );
 		$updated = true;
 	} else {
 		wp_die( __( 'The primary site you chose does not exist.' ) );
