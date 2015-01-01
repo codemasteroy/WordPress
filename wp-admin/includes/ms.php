@@ -789,7 +789,7 @@ function choose_primary_blog() {
 				<?php foreach( (array) $all_blogs as $blog ) {
 					if ( $primary_blog == $blog->userblog_id )
 						$found = true;
-					?><option value="<?php echo $blog->userblog_id ?>"<?php selected( $primary_blog, $blog->userblog_id ); ?>><?php echo esc_url( get_home_url( $blog->userblog_id ) ) ?></option><?php
+					?><option value="<?php echo $blog->userblog_id ?>"<?php selected( $primary_blog, $blog->userblog_id ); ?>><?php echo esc_url( $blog->siteurl ) ?></option><?php
 				} ?>
 			</select>
 			<?php
@@ -799,7 +799,7 @@ function choose_primary_blog() {
 			}
 		} elseif ( count( $all_blogs ) == 1 ) {
 			$blog = array_shift( $all_blogs );
-			echo $blog->domain;
+			echo $blog->siteurl;
 			if ( $primary_blog != $blog->userblog_id ) // Set the primary blog again if it's out of sync with blog list.
 				update_user_meta( get_current_user_id(), 'primary_blog', $blog->userblog_id );
 		} else {
