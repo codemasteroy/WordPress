@@ -267,11 +267,19 @@ function signup_another_blog( $blogname = '', $blog_title = '', $errors = '' ) {
 
 			<p><?php _e( 'Sites you are already a member of:' ) ?></p>
 			<ul>
-				<?php foreach ( $blogs as $blog ) {
+				<?php 
+				$_my_blog_count = 0;
+				foreach ( $blogs as $blog ) {
+					if ($_my_blog_count == 15)
+						break;
+					$_my_blog_count++;
 					$home_url = get_home_url( $blog->userblog_id );
 					echo '<li><a href="' . esc_url( $home_url ) . '">' . $home_url . '</a></li>';
 				} ?>
 			</ul>
+			<?php if ( count($blogs) > 15 ) { ?>
+			<p><?php echo sprintf( __( 'Displaying only 15 blogs out of %d' ), count($blogs) ) ?></p>
+			<?php } ?>
 	<?php } ?>
 
 	<p><?php _e( 'If you&#8217;re not going to use a great site domain, leave it for a new user. Now have at it!' ) ?></p>
