@@ -453,6 +453,10 @@ a {
  * 8.0 RTL
  */
 
+body.rtl {
+	font-family: Arial, Tahoma, sans-serif;
+}
+
 .rtl blockquote {
 	border-left: none;
 	border-right: 4px solid #707070;
