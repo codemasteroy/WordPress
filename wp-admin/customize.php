@@ -16,9 +16,14 @@ if ( ! current_user_can( 'customize' ) ) {
 	wp_die( __( 'Cheatin&#8217; uh?' ), 403 );
 }
 
+$scheme = null;
+if ( is_ssl() ) {
+	$scheme = 'https';
+}
+
 wp_reset_vars( array( 'url', 'return' ) );
 $url = wp_unslash( $url );
-$url = wp_validate_redirect( $url, home_url( '/' ) );
+$url = wp_validate_redirect( $url, home_url( '/', $scheme ) );
 if ( $return ) {
 	$return = wp_unslash( $return );
 	$return = wp_validate_redirect( $return );
@@ -203,9 +208,9 @@ do_action( 'customize_controls_print_scripts' );
 	 * using the customize_allowed_urls filter.
 	 */
 
-	$allowed_urls = array( home_url('/') );
+	$allowed_urls = array( home_url('/', $scheme) );
 	$admin_origin = parse_url( admin_url() );
-	$home_origin  = parse_url( home_url() );
+	$home_origin  = parse_url( home_url( '/', $scheme ) );
 	$cross_domain = ( strtolower( $admin_origin[ 'host' ] ) != strtolower( $home_origin[ 'host' ] ) );
 
 	if ( is_ssl() && ! $cross_domain )
@@ -226,7 +231,7 @@ do_action( 'customize_controls_print_scripts' );
 		'stylesheet'     => $wp_customize->get_stylesheet(),
 		'preview_iframe' => true,
 		'TB_iframe'      => 'true'
-	), home_url( '/' ) );
+	), home_url( '/', $scheme ) );
 
 	$login_url = add_query_arg( array(
 		'interim-login' => 1,
@@ -240,14 +245,14 @@ do_action( 'customize_controls_print_scripts' );
 			'active'     => $wp_customize->is_theme_active(),
 		),
 		'url'      => array(
-			'preview'       => esc_url_raw( $url ? $url : home_url( '/' ) ),
+			'preview'       => esc_url_raw( $url ? $url : home_url( '/', $scheme ) ),
 			'parent'        => esc_url_raw( admin_url() ),
 			'activated'     => esc_url_raw( admin_url( 'themes.php?activated=true&previewed' ) ),
 			'ajax'          => esc_url_raw( admin_url( 'admin-ajax.php', 'relative' ) ),
 			'allowed'       => array_map( 'esc_url_raw', $allowed_urls ),
 			'isCrossDomain' => $cross_domain,
 			'fallback'      => esc_url_raw( $fallback_url ),
-			'home'          => esc_url_raw( home_url( '/' ) ),
+			'home'          => esc_url_raw( home_url( '/', $scheme ) ),
 			'login'         => esc_url_raw( $login_url ),
 		),
 		'browser'  => array(
