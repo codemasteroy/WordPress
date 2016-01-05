@@ -333,8 +333,9 @@ function update_option( $option, $value, $autoload = null ) {
 	}
 
 	$result = $wpdb->update( $wpdb->options, $update_args, array( 'option_name' => $option ) );
-	if ( ! $result )
+	if ( ! $result ) {
 		return false;
+	}
 
 	$notoptions = wp_cache_get( 'notoptions', 'options' );
 	if ( is_array( $notoptions ) && isset( $notoptions[$option] ) ) {
