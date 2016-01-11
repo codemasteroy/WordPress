@@ -1225,56 +1225,6 @@ class wp_xmlrpc_server extends IXR_Server {
 		return $count > 1;
 	}
 
-	private function _validate_boolean( $var ) {
-		if ( is_bool( $var ) ) {
-			return $var;
-		}
-
-		if ( is_string( $var ) && 'false' === strtolower( $var ) ) {
-			return false;
-		}
-
-		return (bool) $var;
-	}
-
-	/**
-	 * Encapsulate the logic for sticking a post
-	 * and determining if the user has permission to do so
-	 *
-	 * @since 4.3.0
-	 * @access private
-	 *
-	 * @param array $post_data
-	 * @param bool  $update
-	 * @return void|IXR_Error
-	 */
-	private function _toggle_sticky( $post_data, $update = false ) {
-		$post_type = get_post_type_object( $post_data['post_type'] );
-
-		// Private and password-protected posts cannot be stickied.
-		if ( 'private' === $post_data['post_status'] || ! empty( $post_data['post_password'] ) ) {
-			// Error if the client tried to stick the post, otherwise, silently unstick.
-			if ( ! empty( $post_data['sticky'] ) ) {
-				return new IXR_Error( 401, __( 'Sorry, you cannot stick a private post.' ) );
-			}
-
-			if ( $update ) {
-				unstick_post( $post_data['ID'] );
-			}
-		} elseif ( isset( $post_data['sticky'] ) )  {
-			if ( ! current_user_can( $post_type->cap->edit_others_posts ) ) {
-				return new IXR_Error( 401, __( 'Sorry, you are not allowed to stick this post.' ) );
-			}
-
-			$sticky = $this->_validate_boolean( $post_data['sticky'] );
-			if ( $sticky ) {
-				stick_post( $post_data['ID'] );
-			} else {
-				unstick_post( $post_data['ID'] );
-			}
-		}
-	}
-
 	/**
 	 * Encapsulate the logic for sticking a post
 	 * and determining if the user has permission to do so
