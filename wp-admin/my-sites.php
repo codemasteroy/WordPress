@@ -23,7 +23,7 @@ $updated = false;
 if ( 'updateblogsettings' == $action && ( isset( $_POST['primary_blog'] ) || isset( $_POST['primary_blog_name'] ) ) ) {
 	check_admin_referer( 'update-my-sites' );
 
-	if ( isset( $_POST['primary_blog'] ) && inval( $_POST['primary_blog'] ) > 0 ) {
+	if ( isset( $_POST['primary_blog'] ) && intval( $_POST['primary_blog'] ) > 0 ) {
 		$blog = get_blog_details( (int) $_POST['primary_blog'] );
 	} elseif ( isset( $_POST['primary_blog_name'] ) && !empty( $_POST['primary_blog_name'] ) ) {
 		$site_url_parts = parse_url( $_POST['primary_blog_name'] );
