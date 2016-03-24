@@ -807,7 +807,12 @@ function choose_primary_blog() {
 		<?php
 		$all_blogs = get_blogs_of_user( get_current_user_id() );
 		$primary_blog = get_user_meta( get_current_user_id(), 'primary_blog', true );
-		if ( count( $all_blogs ) > 1 ) {
+		if ( count( $all_blogs ) > 15 ) {
+			$blog = get_blog_details($primary_blog, true);
+			?>
+			<input type="text" size="75" name="primary_blog_name" value="<?php echo esc_url( $blog->siteurl ); ?>"  />
+			<?php
+		} elseif ( count( $all_blogs ) > 1 ) {
 			$found = false;
 			?>
 			<select name="primary_blog" id="primary_blog">
@@ -822,11 +827,6 @@ function choose_primary_blog() {
 				$blog = reset( $all_blogs );
 				update_user_meta( get_current_user_id(), 'primary_blog', $blog->userblog_id );
 			}
-		} elseif ( count( $all_blogs ) > 15 ) {
-			$blog = get_blog_details($primary_blog, true);
-			?>
-			<input type="text" size="75" name="primary_blog_name" value="<?php echo esc_url( $blog->siteurl ); ?>"  />
-			<?php
 		} elseif ( count( $all_blogs ) == 1 ) {
 			$blog = reset( $all_blogs );
 			echo esc_url( get_home_url( $blog->userblog_id ) );
