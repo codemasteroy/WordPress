@@ -822,6 +822,11 @@ function choose_primary_blog() {
 				$blog = reset( $all_blogs );
 				update_user_meta( get_current_user_id(), 'primary_blog', $blog->userblog_id );
 			}
+		} elseif ( count( $all_blogs ) > 15 ) {
+			$blog = get_blog_details($primary_blog, true);
+			?>
+			<input type="text" size="75" name="primary_blog_name" value="<?php echo esc_url( $blog->siteurl ); ?>"  />
+			<?php
 		} elseif ( count( $all_blogs ) == 1 ) {
 			$blog = reset( $all_blogs );
 			echo esc_url( get_home_url( $blog->userblog_id ) );
@@ -833,6 +838,17 @@ function choose_primary_blog() {
 		?>
 		</td>
 	</tr>
+	<?php if ( in_array( get_site_option( 'registration' ), array( 'all', 'blog' ) ) ) : ?>
+		<tr>
+			<th scope="row" colspan="2" class="th-full">
+				<?php
+				/** This filter is documented in wp-login.php */
+				$sign_up_url = apply_filters( 'wp_signup_location', network_site_url( 'wp-signup.php' ) );
+				?>
+				<a href="<?php echo esc_url( $sign_up_url ); ?>"><?php _e( 'Create a New Site' ); ?></a>
+			</th>
+		</tr>
+	<?php endif; ?>
 	</table>
 	<?php
 }
