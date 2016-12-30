@@ -81,6 +81,14 @@ class wpdb {
 	public $last_error = '';
 
 	/**
+	 * The last error number during query.
+	 *
+	 * @since 3.5.2
+	 * @var string
+	 */
+	var $last_error_number = 0;
+
+	/**
 	 * Amount of queries made
 	 *
 	 * @since 1.2.0
@@ -1470,9 +1478,10 @@ class wpdb {
 		$this->last_query  = null;
 		$this->rows_affected = $this->num_rows = 0;
 		$this->last_error  = '';
+		$this->last_error_number = 0;
 
 		if ( $this->use_mysqli && $this->result instanceof mysqli_result ) {
-			mysqli_free_result( $this->result );
+			@mysqli_free_result( $this->result );
 			$this->result = null;
 
 			// Sanity check before using the handle
@@ -1809,6 +1818,13 @@ class wpdb {
 		}
 
 		if ( $this->last_error ) {
+			// If there is an error then take note of it..
+			if ( $this->use_mysqli ) {
+				$this->last_error_number = mysqli_errno( $this->dbh );
+			} else {
+				$this->last_error_number = mysql_errno( $this->dbh );
+			}
+			
 			// Clear insert_id on a subsequent failed insert.
 			if ( $this->insert_id && preg_match( '/^\s*(insert|replace)\s/i', $query ) )
 				$this->insert_id = 0;

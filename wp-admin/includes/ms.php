@@ -836,7 +836,7 @@ function choose_primary_blog() {
 		<th scope="row"><label for="primary_blog"><?php _e( 'Primary Site' ); ?></label></th>
 		<td>
 		<?php
-		$all_blogs = get_blogs_of_user( get_current_user_id() );
+		$all_blogs = get_blogs_of_user( get_current_user_id(), false, 17 );
 		$primary_blog = get_user_meta( get_current_user_id(), 'primary_blog', true );
 		if ( count( $all_blogs ) > 15 ) {
 			$blog = get_blog_details($primary_blog, true);

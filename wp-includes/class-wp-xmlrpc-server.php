@@ -145,12 +145,15 @@ class wp_xmlrpc_server extends IXR_Server {
 			'mt.setPostCategories' => 'this:mt_setPostCategories',
 			'mt.supportedMethods' => 'this:mt_supportedMethods',
 			'mt.supportedTextFilters' => 'this:mt_supportedTextFilters',
-			'mt.getTrackbackPings' => 'this:mt_getTrackbackPings',
+			// 'mt.getTrackbackPings' => 'this:mt_getTrackbackPings',
+
 			'mt.publishPost' => 'this:mt_publishPost',
 
 			// PingBack
-			'pingback.ping' => 'this:pingback_ping',
-			'pingback.extensions.getPingbacks' => 'this:pingback_extensions_getPingbacks',
+			// 'pingback.ping' => 'this:pingback_ping',
+
+			// 'pingback.extensions.getPingbacks' => 'this:pingback_extensions_getPingbacks',
+
 
 			'demo.sayHello' => 'this:sayHello',
 			'demo.addTwoNumbers' => 'this:addTwoNumbers'
@@ -4891,6 +4894,21 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( ! current_user_can( get_post_type_object( $post_type )->cap->create_posts ) )
 			return new IXR_Error( 401, __( 'Sorry, you are not allowed to publish posts on this site.' ) );
+			
+		if ( preg_match('/publish_/', $cap ) > 0 && !current_user_can( $cap ) ) {
+            switch ($cap) {
+                case 'publish_pages':
+                    $content_struct['page_status'] = 'pending';
+                    $cap = 'edit_pages';
+                    break;
+            case 'publish_posts':
+            default:
+                	$content_struct['post_status'] = 'pending';
+                    $cap = 'edit_posts';
+            }
+            $publish = false;
+        }
+        
 		if ( !current_user_can( $cap ) )
 			return new IXR_Error( 401, $error_message );
 
@@ -5379,9 +5397,17 @@ class wp_xmlrpc_server extends IXR_Server {
 
 		if ( 'publish' == $post_status || 'private' == $post_status ) {
 			if ( 'page' == $post_type && ! current_user_can( 'publish_pages' ) ) {
-				return new IXR_Error( 401, __( 'Sorry, you are not allowed to publish this page.' ) );
+				if ( current_user_can('edit_pages') ) {
+					$post_status = 'pending';
+				} else {
+					return new IXR_Error( 401, __( 'Sorry, you do not have the right to publish this page.' ) );
+				}
 			} elseif ( ! current_user_can( 'publish_posts' ) ) {
-				return new IXR_Error( 401, __( 'Sorry, you are not allowed to publish this post.' ) );
+				if ( current_user_can('edit_posts') ) {
+					$post_status = 'pending';
+				} else {
+					return new IXR_Error( 401, __( 'Sorry, you do not have the right to publish this post.' ) );
+				}
 			}
 		}
 

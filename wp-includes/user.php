@@ -572,7 +572,7 @@ function get_users( $args = array() ) {
  * @return array A list of the user's sites. An empty array if the user doesn't exist
  *               or belongs to no sites.
  */
-function get_blogs_of_user( $user_id, $all = false ) {
+function get_blogs_of_user( $user_id, $all = false, $limit = 100) {
 	global $wpdb;
 
 	$user_id = (int) $user_id;
@@ -644,7 +644,7 @@ function get_blogs_of_user( $user_id, $all = false ) {
 
 	if ( ! empty( $site_ids ) ) {
 		$args = array(
-			'number'   => '',
+			'number'   => $limit,
 			'site__in' => $site_ids,
 		);
 		if ( ! $all ) {
