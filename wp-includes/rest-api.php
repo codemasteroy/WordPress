@@ -319,8 +319,12 @@ function get_rest_url( $blog_id = null, $path = '/', $scheme = 'rest' ) {
 	}
 
 	if ( is_ssl() ) {
+		$http_host = $_SERVER['SERVER_NAME'];
+		if ( isset( $_SERVER['HTTP_HOST'] ) ) {
+			$http_host = $_SERVER['HTTP_HOST'];
+		}
 		// If the current host is the same as the REST URL host, force the REST URL scheme to HTTPS.
-		if ( $_SERVER['SERVER_NAME'] === parse_url( get_home_url( $blog_id ), PHP_URL_HOST ) ) {
+		if ( $http_host === parse_url( get_home_url( $blog_id ), PHP_URL_HOST ) ) {
 			$url = set_url_scheme( $url, 'https' );
 		}
 	}
