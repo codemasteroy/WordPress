@@ -214,7 +214,7 @@ function wp_admin_bar_my_account_item( $wp_admin_bar ) {
 
 	$avatar = get_avatar( $user_id, 26 );
 	/* translators: %s: current user's display name */
-	$howdy  = sprintf( __( 'Howdy, %s' ), $current_user->display_name );
+	$howdy  = sprintf( __( 'Howdy, %s' ), '<span class="display-name">' . $current_user->display_name . '</span>' );
 	$class  = empty( $avatar ) ? '' : 'with-avatar';
 
 	$wp_admin_bar->add_menu( array(
@@ -301,8 +301,9 @@ function wp_admin_bar_site_menu( $wp_admin_bar ) {
 		return;
 
 	// Show only when the user is a member of this site, or they're a super admin.
-	if ( ! is_user_member_of_blog() && ! is_super_admin() )
+	if ( ! is_user_member_of_blog() && ! current_user_can( 'manage_network' ) ) {
 		return;
+	}
 
 	$blogname = get_bloginfo('name');
 
@@ -417,8 +418,9 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		return;
 
 	// Show only when the user has at least one site, or they're a super admin.
-	if ( count( $wp_admin_bar->user->blogs ) < 1 && ! is_super_admin() )
+	if ( count( $wp_admin_bar->user->blogs ) < 1 && ! current_user_can( 'manage_network' ) ) {
 		return;
+	}
 
 	if ( $wp_admin_bar->user->active_blog ) {
 		$my_sites_url = get_admin_url( $wp_admin_bar->user->active_blog->blog_id, 'my-sites.php' );
@@ -432,7 +434,7 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		'href'  => $my_sites_url,
 	) );
 
-	if ( is_super_admin() ) {
+	if ( current_user_can( 'manage_network' ) ) {
 		$wp_admin_bar->add_group( array(
 			'parent' => 'my-sites',
 			'id'     => 'my-sites-super-admin',
@@ -451,36 +453,51 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 			'title'  => __( 'Dashboard' ),
 			'href'   => network_admin_url(),
 		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id'     => 'network-admin-s',
-			'title'  => __( 'Sites' ),
-			'href'   => network_admin_url( 'sites.php' ),
-		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id'     => 'network-admin-u',
-			'title'  => __( 'Users' ),
-			'href'   => network_admin_url( 'users.php' ),
-		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id'     => 'network-admin-t',
-			'title'  => __( 'Themes' ),
-			'href'   => network_admin_url( 'themes.php' ),
-		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id'     => 'network-admin-p',
-			'title'  => __( 'Plugins' ),
-			'href'   => network_admin_url( 'plugins.php' ),
-		) );
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'network-admin',
-			'id'     => 'network-admin-o',
-			'title'  => __( 'Settings' ),
-			'href'   => network_admin_url( 'settings.php' ),
-		) );
+
+		if ( current_user_can( 'manage_sites' ) ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'network-admin',
+				'id'     => 'network-admin-s',
+				'title'  => __( 'Sites' ),
+				'href'   => network_admin_url( 'sites.php' ),
+			) );
+		}
+
+		if ( current_user_can( 'manage_network_users' ) ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'network-admin',
+				'id'     => 'network-admin-u',
+				'title'  => __( 'Users' ),
+				'href'   => network_admin_url( 'users.php' ),
+			) );
+		}
+
+		if ( current_user_can( 'manage_network_themes' ) ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'network-admin',
+				'id'     => 'network-admin-t',
+				'title'  => __( 'Themes' ),
+				'href'   => network_admin_url( 'themes.php' ),
+			) );
+		}
+
+		if ( current_user_can( 'manage_network_plugins' ) ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'network-admin',
+				'id'     => 'network-admin-p',
+				'title'  => __( 'Plugins' ),
+				'href'   => network_admin_url( 'plugins.php' ),
+			) );
+		}
+
+		if ( current_user_can( 'manage_network_options' ) ) {
+			$wp_admin_bar->add_menu( array(
+				'parent' => 'network-admin',
+				'id'     => 'network-admin-o',
+				'title'  => __( 'Settings' ),
+				'href'   => network_admin_url( 'settings.php' ),
+			) );
+		}
 	}
 
 	// Add site links
@@ -488,7 +505,7 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		'parent' => 'my-sites',
 		'id'     => 'my-sites-list',
 		'meta'   => array(
-			'class' => is_super_admin() ? 'ab-sub-secondary' : '',
+			'class' => current_user_can( 'manage_network' ) ? 'ab-sub-secondary' : '',
 		),
 	) );
 
@@ -719,8 +736,9 @@ function wp_admin_bar_new_content_menu( $wp_admin_bar ) {
 	if ( isset( $actions['post-new.php?post_type=content'] ) )
 		$actions['post-new.php?post_type=content'][1] = 'add-new-content';
 
-	if ( current_user_can( 'create_users' ) || current_user_can( 'promote_users' ) )
+	if ( current_user_can( 'create_users' ) || ( is_multisite() && current_user_can( 'promote_users' ) ) ) {
 		$actions[ 'user-new.php' ] = array( _x( 'User', 'add new from admin bar' ), 'new-user' );
+	}
 
 	if ( ! $actions )
 		return;

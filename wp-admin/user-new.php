@@ -37,12 +37,12 @@ if ( isset($_REQUEST['action']) && 'adduser' == $_REQUEST['action'] ) {
 	if ( false !== strpos( $user_email, '@' ) ) {
 		$user_details = get_user_by( 'email', $user_email );
 	} else {
-		//if ( is_super_admin() ) {
+		if ( current_user_can( 'manage_network_users' ) ) {
 			$user_details = get_user_by( 'login', $user_email );
-		/*} else {
+		} else {
 			wp_redirect( add_query_arg( array('update' => 'enter_email'), 'user-new.php' ) );
 			die();
-		}*/
+		}
 	}
 
 	if ( !$user_details ) {
@@ -63,10 +63,10 @@ if ( isset($_REQUEST['action']) && 'adduser' == $_REQUEST['action'] ) {
 	$redirect = 'user-new.php';
 	$username = $user_details->user_login;
 	$user_id = $user_details->ID;
-	if ( ( $username != null && !is_super_admin( $user_id ) ) && ( array_key_exists($blog_id, get_blogs_of_user($user_id)) ) ) {
+	if ( $username != null && array_key_exists( $blog_id, get_blogs_of_user( $user_id ) ) ) {
 		$redirect = add_query_arg( array('update' => 'addexisting'), 'user-new.php' );
 	} else {
-		if ( isset( $_POST[ 'noconfirmation' ] ) /* && current_user_can( 'manage_network_users' ) */ ) {
+		if ( isset( $_POST[ 'noconfirmation' ] ) && current_user_can( 'manage_network_users' ) ) {
 			add_existing_user_to_blog( array( 'user_id' => $user_id, 'role' => $_REQUEST[ 'role' ] ) );
 			$redirect = add_query_arg( array( 'update' => 'addnoconfirmation' , 'user_id' => $user_id ), 'user-new.php' );
 		} else {
@@ -147,12 +147,12 @@ Please click the following link to confirm the invite:
 			 * @param string $user_login The sanitized username.
 			 */
 			$new_user_login = apply_filters( 'pre_user_login', sanitize_user( wp_unslash( $_REQUEST['user_login'] ), true ) );
-			if ( isset( $_POST[ 'noconfirmation' ] ) /* && current_user_can( 'manage_network_users' ) */ ) {
+			if ( isset( $_POST[ 'noconfirmation' ] ) && current_user_can( 'manage_network_users' ) ) {
 				add_filter( 'wpmu_signup_user_notification', '__return_false' ); // Disable confirmation email
-				// add_filter( 'wpmu_welcome_user_notification', '__return_false' ); // Disable welcome email
+				add_filter( 'wpmu_welcome_user_notification', '__return_false' ); // Disable welcome email
 			}
 			wpmu_signup_user( $new_user_login, $new_user_email, array( 'add_to_blog' => $wpdb->blogid, 'new_role' => $_REQUEST['role'] ) );
-			if ( isset( $_POST[ 'noconfirmation' ] ) /* && current_user_can( 'manage_network_users' ) */ ) {
+			if ( isset( $_POST[ 'noconfirmation' ] ) && current_user_can( 'manage_network_users' ) ) {
 				$key = $wpdb->get_var( $wpdb->prepare( "SELECT activation_key FROM {$wpdb->signups} WHERE user_login = %s AND user_email = %s", $new_user_login, $new_user_email ) );
 				$new_user = wpmu_activate_signup( $key );
 				if ( is_wp_error( $new_user ) ) {
@@ -225,7 +225,7 @@ wp_enqueue_script( 'user-profile' );
  * @param bool $enable Whether to enable auto-complete for non-super admins. Default false.
  */
 if ( is_multisite() && current_user_can( 'promote_users' ) && ! wp_is_large_network( 'users' )
-	&& ( is_super_admin() || apply_filters( 'autocomplete_users_for_site_admins', false ) )
+	&& ( current_user_can( 'manage_network_users' ) || apply_filters( 'autocomplete_users_for_site_admins', false ) )
 ) {
 	wp_enqueue_script( 'user-suggest' );
 }
@@ -313,15 +313,15 @@ if ( ! empty( $messages ) ) {
 if ( is_multisite() ) {
 	if ( $do_both )
 		echo '<h2 id="add-existing-user">' . __( 'Add Existing User' ) . '</h2>';
-	/* if ( !is_super_admin() ) {
+	if ( ! current_user_can( 'manage_network_users' ) ) {
 		echo '<p>' . __( 'Enter the email address of an existing user on this network to invite them to this site. That person will be sent an email asking them to confirm the invite.' ) . '</p>';
 		$label = __('Email');
 		$type  = 'email';
-	} else { */
+	} else {
 		echo '<p>' . __( 'Enter the email address or username of an existing user on this network to invite them to this site. That person will be sent an email asking them to confirm the invite.' ) . '</p>';
 		$label = __('Email or Username');
 		$type  = 'text';
-	// }
+	}
 ?>
 <form method="post" name="adduser" id="adduser" class="validate" novalidate="novalidate"<?php
 	/**
@@ -346,8 +346,16 @@ if ( is_multisite() ) {
 			</select>
 		</td>
 	</tr>
+<?php if ( current_user_can( 'manage_network_users' ) ) { ?>
+	<tr>
+		<th scope="row"><?php _e( 'Skip Confirmation Email' ); ?></th>
+		<td>
+			<input type="checkbox" name="noconfirmation" id="adduser-noconfirmation" value="1" />
+			<label for="adduser-noconfirmation"><?php _e( 'Add the user without sending an email that requires their confirmation.' ); ?></label>
+		</td>
+	</tr>
+<?php } ?>
 </table>
-<input type="hidden" name="noconfirmation" id="noconfirmation" value="1" />
 <?php
 /**
  * Fires at the end of the new user form.
@@ -474,8 +482,17 @@ $new_user_ignore_pass = $creating && isset( $_POST['noconfirmation'] ) ? wp_unsl
 			</select>
 		</td>
 	</tr>
+	<?php if ( is_multisite() && current_user_can( 'manage_network_users' ) ) { ?>
+	<tr>
+		<th scope="row"><?php _e( 'Skip Confirmation Email' ); ?></th>
+		<td>
+			<input type="checkbox" name="noconfirmation" id="noconfirmation" value="1" <?php checked( $new_user_ignore_pass ); ?> />
+			<label for="noconfirmation"><?php _e( 'Add the user without sending an email that requires their confirmation.' ); ?></label>
+		</td>
+	</tr>
+	<?php } ?>
 </table>
-<input type="hidden" name="noconfirmation" id="noconfirmation" value="1" />
+
 <?php
 /** This action is documented in wp-admin/user-new.php */
 do_action( 'user_new_form', 'add-new-user' );
