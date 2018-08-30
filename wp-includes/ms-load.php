@@ -135,7 +135,7 @@ function get_network_by_path( $domain, $path, $segments = null ) {
 
 /**
  * Retrieves the closest matching site object by its domain and path.
- * 
+ *
  * This will not necessarily return an exact match for a domain and path. Instead, it
  * breaks the domain and path into pieces that are then used to match the closest
  * possibility from a query.
@@ -223,6 +223,8 @@ function get_site_by_path( $domain, $path, $segments = null ) {
 	$domains = array( $domain );
 	if ( 'www.' === substr( $domain, 0, 4 ) ) {
 		$domains[] = substr( $domain, 4 );
+	} else {
+		$domains[] = "www.{$domain}";
 	}
 
 	$args = array(
