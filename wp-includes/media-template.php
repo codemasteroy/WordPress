@@ -162,7 +162,7 @@ function wp_print_media_templates() {
 	</script>
 
 	<script type="text/html" id="tmpl-media-modal">
-		<div class="<?php echo $class; ?>">
+		<div tabindex="0" class="<?php echo $class; ?>">
 			<button type="button" class="media-modal-close"><span class="media-modal-icon"><span class="screen-reader-text"><?php _e( 'Close media panel' ); ?></span></span></button>
 			<div class="media-modal-content"></div>
 		</div>
@@ -428,7 +428,7 @@ function wp_print_media_templates() {
 			<div class="actions">
 				<a class="view-attachment" href="{{ data.link }}"><?php _e( 'View attachment page' ); ?></a>
 				<# if ( data.can.save ) { #> |
-					<a href="post.php?post={{ data.id }}&action=edit"><?php _e( 'Edit more details' ); ?></a>
+					<a href="{{ data.editLink }}"><?php _e( 'Edit more details' ); ?></a>
 				<# } #>
 				<# if ( ! data.uploading && data.can.remove ) { #> |
 					<?php if ( MEDIA_TRASH ): ?>
@@ -1009,7 +1009,7 @@ function wp_print_media_templates() {
 								</div>
 								<label class="setting link-rel">
 									<span><?php _e('Link Rel'); ?></span>
-									<input type="text" data-setting="linkRel" value="{{ data.model.linkClassName }}" />
+									<input type="text" data-setting="linkRel" value="{{ data.model.linkRel }}" />
 								</label>
 								<label class="setting link-class-name">
 									<span><?php _e('Link CSS Class'); ?></span>
