@@ -20,12 +20,12 @@ $action = isset( $_POST['action'] ) ? $_POST['action'] : 'splash';
 $blogs = get_blogs_of_user( $current_user->ID );
 
 $updated = false;
-if ( 'updateblogsettings' == $action && ( isset( $_POST['primary_blog'] ) || isset( $_POST['primary_blog_name'] ) ) ) {
+if ( 'updateblogsettings' == $action && isset( $_POST['primary_blog'] ) ) {
 	check_admin_referer( 'update-my-sites' );
 
 	$blog = get_site( (int) $_POST['primary_blog'] );
 	if ( $blog && isset( $blog->domain ) ) {
-		update_user_option( $current_user->ID, 'primary_blog', $blog->blog_id, true );
+		update_user_option( $current_user->ID, 'primary_blog', (int) $_POST['primary_blog'], true );
 		$updated = true;
 	} else {
 		wp_die( __( 'The primary site you chose does not exist.' ) );
@@ -78,49 +78,15 @@ else :
 <form id="myblogs" method="post">
 	<?php
 	choose_primary_blog();
-	submit_button();
 	/**
-	 * Fires before the sites table on the My Sites screen.
+	 * Fires before the sites list on the My Sites screen.
 	 *
 	 * @since 3.0.0
 	 */
 	do_action( 'myblogs_allblogs_options' );
-
-?>
-	<input type="hidden" name="action" value="updateblogsettings" />
-	<?php wp_nonce_field( 'update-my-sites' ); ?>
-
-<div class="tablenav">
-<?php
-	// Pagination start
-	$per_page = 10;
-	$total_blogs = count( $blogs );
-
-	$current_page = ( isset( $_GET['paged'] ) && intval( $_GET['paged'] ) > 0 ) ? intval( $_GET['paged'] ) : 1;
-	$page_start = ( ( $current_page - 1 ) * $per_page );
-	$oblogs = $blogs;
-
-	$blogs = array_slice( $blogs, $page_start, $per_page );
-	// Pagination end
-
-	$page_links = paginate_links( array(
-		'base' => add_query_arg( 'paged', '%#%' ),
-		'format' => '',
-		'prev_text' => __('&laquo;'),
-		'next_text' => __('&raquo;'),
-		'total' => ceil($total_blogs / $per_page),
-		'current' => $current_page
-	));
-
-	if ( $page_links )
-		echo "<div class='tablenav-pages'>$page_links</div>";
-
-	do_action( 'myblogs_bulk_actions' );
-
 	?>
 	<br clear="all" />
-</div>
-	<table class="widefat fixed">
+	<ul class="my-sites striped">
 	<?php
 	/**
 	 * Enable the Global Settings section on the My Sites screen.
@@ -136,32 +102,15 @@ else :
 	 */
 	$settings_html = apply_filters( 'myblogs_options', '', 'global' );
 	if ( $settings_html != '' ) {
-		echo '<tr><td valign="top"><h3>' . __( 'Global Settings' ) . '</h3></td><td>';
+		echo '<h3>' . __( 'Global Settings' ) . '</h3>';
 		echo $settings_html;
-		echo '</td></tr>';
 	}
 	reset( $blogs );
-	$num = count( $blogs );
-	$cols = 1;
-	if ( $num >= 20 )
-		$cols = 4;
-	elseif ( $num >= 10 )
-		$cols = 2;
-	$num_rows = ceil( $num / $cols );
-	$split = 0;
-	for ( $i = 1; $i <= $num_rows; $i++ ) {
-		$rows[] = array_slice( $blogs, $split, $cols );
-		$split = $split + $cols;
-	}
 
-	$c = '';
-	foreach ( $rows as $row ) {
-		$c = $c == 'alternate' ? '' : 'alternate';
-		echo "<tr class='$c'>";
-		$i = 0;
-		foreach ( $row as $user_blog ) {
-			$s = $i == 3 ? '' : 'border-right: 1px solid #ccc;';
-			echo "<td valign='top' style='$s'>";
+	foreach ( $blogs as $user_blog ) {
+		switch_to_blog( $user_blog->userblog_id );
+
+		echo "<li>";
 		echo "<h3>{$user_blog->blogname}</h3>";
 
 		$actions = "<a href='" . esc_url( home_url() ). "'>" . __( 'Visit' ) . '</a>';
@@ -178,23 +127,23 @@ else :
 		 * @param string $actions   The HTML site link markup.
 		 * @param object $user_blog An object containing the site data.
 		 */
-			echo "<p>" . apply_filters( 'myblogs_blog_actions', "<a href='" . esc_url( get_home_url( $user_blog->userblog_id ) ). "'>" . __( 'Visit' ) . "</a> | <a href='" . esc_url( get_admin_url( $user_blog->userblog_id ) ) . "'>" . __( 'Dashboard' ) . "</a>", $user_blog ) . "</p>";
+		$actions = apply_filters( 'myblogs_blog_actions', $actions, $user_blog );
+		echo "<p class='my-sites-actions'>" . $actions . '</p>';
+
 		/** This filter is documented in wp-admin/my-sites.php */
 		echo apply_filters( 'myblogs_options', '', $user_blog );
-			echo "</td>";
-			$i++;
-		}
-		echo "</tr>";
+		echo "</li>";
+
+		restore_current_blog();
 	}?>
-	</table>
-	<div class="tablenav">
+	</ul>
 	<?php
-	if ( $page_links )
-		echo "<div class='tablenav-pages'>$page_links</div>";
+	if ( count( $blogs ) > 1 || has_action( 'myblogs_allblogs_options' ) || has_filter( 'myblogs_options' ) ) {
+		?><input type="hidden" name="action" value="updateblogsettings" /><?php
+		wp_nonce_field( 'update-my-sites' );
+		submit_button();
+	}
 	?>
-	</div>
-	<input type="hidden" name="action" value="updateblogsettings" />
-	<?php wp_nonce_field( 'update-my-sites' ); ?>
 	</form>
 <?php endif; ?>
 	</div>
