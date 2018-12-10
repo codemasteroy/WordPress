@@ -129,7 +129,7 @@ else :
 	 * string to this filter will enable the section, and allow new settings
 	 * to be added, either globally or for specific sites.
 	 *
-	 * @since MU
+	 * @since MU (3.0.0)
 	 *
 	 * @param string $settings_html The settings HTML markup. Default empty.
 	 * @param object $context       Context of the setting (global or site-specific). Default 'global'.
@@ -163,12 +163,19 @@ else :
 			$s = $i == 3 ? '' : 'border-right: 1px solid #ccc;';
 			echo "<td valign='top' style='$s'>";
 		echo "<h3>{$user_blog->blogname}</h3>";
+
+		$actions = "<a href='" . esc_url( home_url() ). "'>" . __( 'Visit' ) . '</a>';
+
+		if ( current_user_can( 'read' ) ) {
+			$actions .= " | <a href='" . esc_url( admin_url() ) . "'>" . __( 'Dashboard' ) . '</a>';
+		}
+
 		/**
 		 * Filters the row links displayed for each site on the My Sites screen.
 		 *
-		 * @since MU
+		 * @since MU (3.0.0)
 		 *
-		 * @param string $string    The HTML site link markup.
+		 * @param string $actions   The HTML site link markup.
 		 * @param object $user_blog An object containing the site data.
 		 */
 			echo "<p>" . apply_filters( 'myblogs_blog_actions', "<a href='" . esc_url( get_home_url( $user_blog->userblog_id ) ). "'>" . __( 'Visit' ) . "</a> | <a href='" . esc_url( get_admin_url( $user_blog->userblog_id ) ) . "'>" . __( 'Dashboard' ) . "</a>", $user_blog ) . "</p>";
