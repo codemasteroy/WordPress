@@ -17,13 +17,20 @@ if ( ! current_user_can('read') )
 
 $action = isset( $_POST['action'] ) ? $_POST['action'] : 'splash';
 
-$blogs = get_blogs_of_user( $current_user->ID );
+$blogs_ids = get_blogs_of_user( $current_user->ID, false, array( 'fields' => 'ids' ) );
 
 $updated = false;
 if ( 'updateblogsettings' == $action && ( isset( $_POST['primary_blog'] ) || isset( $_POST['primary_blog_name'] ) ) ) {
 	check_admin_referer( 'update-my-sites' );
 
+	if ( isset( $_POST['primary_blog'] ) && intval( $_POST['primary_blog'] ) > 0 ) {
 	$blog = get_site( (int) $_POST['primary_blog'] );
+	} elseif ( isset( $_POST['primary_blog_name'] ) && !empty( $_POST['primary_blog_name'] ) ) {
+		$site_url_parts = parse_url( $_POST['primary_blog_name'] );
+		if ( $site_url_parts ) {
+			$blog = get_site_by_path( $site_url_parts['host'], $site_url_parts['path'] );
+		}
+	}
 	if ( $blog && isset( $blog->domain ) ) {
 		update_user_option( $current_user->ID, 'primary_blog', $blog->blog_id, true );
 		$updated = true;
@@ -66,7 +73,7 @@ if ( in_array( get_site_option( 'registration' ), array( 'all', 'blog' ) ) ) {
 	printf( ' <a href="%s" class="page-title-action">%s</a>', esc_url( $sign_up_url ), esc_html_x( 'Add New', 'site' ) );
 }
 
-if ( empty( $blogs ) ) :
+if ( empty( $blogs_ids ) ) :
 	echo '<p>';
 	_e( 'You must be a member of at least one site to use this page.' );
 	echo '</p>';
@@ -93,14 +100,13 @@ else :
 <div class="tablenav">
 <?php
 	// Pagination start
-	$per_page = 10;
-	$total_blogs = count( $blogs );
+	$per_page = !isset($per_page) ? 10 : $per_page;
+	$total_blogs = count( $blogs_ids );
 
 	$current_page = ( isset( $_GET['paged'] ) && intval( $_GET['paged'] ) > 0 ) ? intval( $_GET['paged'] ) : 1;
 	$page_start = ( ( $current_page - 1 ) * $per_page );
-	$oblogs = $blogs;
 
-	$blogs = array_slice( $blogs, $page_start, $per_page );
+	$blogs = get_blogs_of_user( $current_user->ID, false, array( 'number' => $per_page, 'offset' => $page_start ) );
 	// Pagination end
 
 	$page_links = paginate_links( array(

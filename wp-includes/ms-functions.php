@@ -41,37 +41,39 @@ function get_sitestats() {
  */
 function get_active_blog_for_user( $user_id ) {
 	global $wpdb;
-	$blogs = get_blogs_of_user( $user_id );
-	if ( empty( $blogs ) )
+	$blogs_ids = get_blogs_of_user( $user_id, false, array( 'fields' => 'ids' ) );
+	if ( empty( $blogs_ids ) )
 		return;
 
 	if ( !is_multisite() )
-		return $blogs[$wpdb->blogid];
+		return get_site( get_current_blog_id() );
 
 	$primary_blog = get_user_meta( $user_id, 'primary_blog', true );
-	$first_blog = current($blogs);
+	$first_blog_id = current($blogs_ids);
 	if ( false !== $primary_blog ) {
-		if ( ! isset( $blogs[ $primary_blog ] ) ) {
-			update_user_meta( $user_id, 'primary_blog', $first_blog->userblog_id );
-			$primary = get_site( $first_blog->userblog_id );
+		if ( ! in_array( $primary_blog, $blogs_ids ) ) {
+			update_user_meta( $user_id, 'primary_blog', $first_blog_id );
+			$primary = get_site( $first_blog_id );
 		} else {
 			$primary = get_site( $primary_blog );
 		}
 	} else {
 		//TODO Review this call to add_user_to_blog too - to get here the user must have a role on this blog?
-		add_user_to_blog( $first_blog->userblog_id, $user_id, 'subscriber' );
-		update_user_meta( $user_id, 'primary_blog', $first_blog->userblog_id );
-		$primary = $first_blog;
+		add_user_to_blog( $first_blog_id, $user_id, 'subscriber' );
+		update_user_meta( $user_id, 'primary_blog', $first_blog_id );
+		$primary = get_site( $first_blog_id );
 	}
 
 	if ( ( ! is_object( $primary ) ) || ( $primary->archived == 1 || $primary->spam == 1 || $primary->deleted == 1 ) ) {
-		$blogs = get_blogs_of_user( $user_id, true ); // if a user's primary blog is shut down, check their other blogs.
+		$blogs_ids = get_blogs_of_user( $user_id, true, array( 'fields' => 'ids' ) ); // if a user's primary blog is shut down, check their other blogs.
 		$ret = false;
-		if ( is_array( $blogs ) && count( $blogs ) > 0 ) {
-			foreach ( (array) $blogs as $blog_id => $blog ) {
-				if ( $blog->site_id != $wpdb->siteid )
-					continue;
+		if ( is_array( $blogs_ids ) && count( $blogs_ids ) > 0 ) {
+			foreach ( (array) $blogs_ids as $blog_id ) {
 				$details = get_site( $blog_id );
+				
+				if ( $details->site_id != $wpdb->siteid )
+					continue;
+
 				if ( is_object( $details ) && $details->archived == 0 && $details->spam == 0 && $details->deleted == 0 ) {
 					$ret = $blog;
 					if ( get_user_meta( $user_id , 'primary_blog', true ) != $blog_id )
@@ -222,10 +224,11 @@ function remove_user_from_blog($user_id, $blog_id = '', $reassign = '') {
 	if ( $primary_blog == $blog_id ) {
 		$new_id = '';
 		$new_domain = '';
-		$blogs = get_blogs_of_user($user_id);
-		foreach ( (array) $blogs as $blog ) {
-			if ( $blog->userblog_id == $blog_id )
+		$user_blogs_ids = get_blogs_of_user($user_id, false, array( 'fields' => 'ids' ));
+		foreach ( (array) $blogs_ids as $user_blog_id ) {
+			if ( $user_blog_id == $blog_id )
 				continue;
+			$blog = get_site($user_blog_id);
 			$new_id = $blog->userblog_id;
 			$new_domain = $blog->domain;
 			break;
@@ -244,7 +247,7 @@ function remove_user_from_blog($user_id, $blog_id = '', $reassign = '') {
 
 	$user->remove_all_caps();
 
-	$blogs = get_blogs_of_user($user_id);
+	$blogs = get_blogs_of_user($user_id, false, array( 'fields' => 'ids' ));
 	if ( count($blogs) == 0 ) {
 		update_user_meta($user_id, 'primary_blog', '');
 		update_user_meta($user_id, 'source_domain', '');
@@ -1711,13 +1714,13 @@ function get_current_site() {
 function get_most_recent_post_of_user( $user_id ) {
 	global $wpdb;
 
-	$user_blogs = get_blogs_of_user( (int) $user_id );
+	$user_blogs_ids = get_blogs_of_user( (int) $user_id, false, array( 'fields' => 'ids' ) );
 	$most_recent_post = array();
 
 	// Walk through each blog and get the most recent post
 	// published by $user_id
-	foreach ( (array) $user_blogs as $blog ) {
-		$prefix = $wpdb->get_blog_prefix( $blog->userblog_id );
+	foreach ( (array) $user_blogs_ids as $blog_id ) {
+		$prefix = $wpdb->get_blog_prefix( $blog_id );
 		$recent_post = $wpdb->get_row( $wpdb->prepare("SELECT ID, post_date_gmt FROM {$prefix}posts WHERE post_author = %d AND post_type = 'post' AND post_status = 'publish' ORDER BY post_date_gmt DESC LIMIT 1", $user_id ), ARRAY_A);
 
 		// Make sure we found a post
@@ -1729,7 +1732,7 @@ function get_most_recent_post_of_user( $user_id ) {
 			// most recent post.
 			if ( !isset($most_recent_post['post_gmt_ts']) || ( $post_gmt_ts > $most_recent_post['post_gmt_ts'] ) ) {
 				$most_recent_post = array(
-					'blog_id'		=> $blog->userblog_id,
+					'blog_id'		=> $blog_id,
 					'post_id'		=> $recent_post['ID'],
 					'post_date_gmt'	=> $recent_post['post_date_gmt'],
 					'post_gmt_ts'	=> $post_gmt_ts

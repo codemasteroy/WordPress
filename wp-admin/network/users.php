@@ -70,19 +70,19 @@ if ( isset( $_GET['action'] ) ) {
 									wp_die( sprintf( __( 'Warning! User cannot be modified. The user %s is a network administrator.' ), esc_html( $user->user_login ) ) );
 
 								$userfunction = 'all_spam';
-								$blogs = get_blogs_of_user( $user_id, true );
-								foreach ( (array) $blogs as $details ) {
-									if ( $details->userblog_id != get_network()->site_id ) // main blog not a spam !
-										update_blog_status( $details->userblog_id, 'spam', '1' );
+								$blogs_ids = get_blogs_of_user( $user_id, 'all_ids' );
+								foreach ( (array) $blogs_ids as $blog_id ) {
+									if ( $blog_id != get_network()->site_id ) // main blog not a spam !
+										update_blog_status( $blog_id, 'spam', '1' );
 								}
 								update_user_status( $user_id, 'spam', '1' );
 							break;
 
 							case 'notspam':
 								$userfunction = 'all_notspam';
-								$blogs = get_blogs_of_user( $user_id, true );
-								foreach ( (array) $blogs as $details )
-									update_blog_status( $details->userblog_id, 'spam', '0' );
+								$blogs_ids = get_blogs_of_user( $user_id, 'all_ids' );
+								foreach ( (array) $blogs_ids as $blog_id )
+									update_blog_status( $blog_id, 'spam', '0' );
 
 								update_user_status( $user_id, 'spam', '0' );
 							break;

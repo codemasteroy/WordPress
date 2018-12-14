@@ -227,12 +227,12 @@ function wpmu_delete_user( $id ) {
 	 */
 	do_action( 'wpmu_delete_user', $id );
 
-	$blogs = get_blogs_of_user( $id );
+	$blogs_ids = get_blogs_of_user( $id, false, array( 'fields' => 'ids' ) );
 
-	if ( ! empty( $blogs ) ) {
-		foreach ( $blogs as $blog ) {
-			switch_to_blog( $blog->userblog_id );
-			remove_user_from_blog( $id, $blog->userblog_id );
+	if ( ! empty( $blogs_ids ) ) {
+		foreach ( $blogs_ids as $blog_id ) {
+			switch_to_blog( $blog_id );
+			remove_user_from_blog( $id, $blog_id );
 
 			$post_ids = $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_author = %d", $id ) );
 			foreach ( (array) $post_ids as $post_id ) {
@@ -676,7 +676,13 @@ function _access_denied_splash() {
 	if ( ! is_user_logged_in() || is_network_admin() )
 		return;
 
-	$blogs = get_blogs_of_user( get_current_user_id() );
+	/**
+	 * Filters args when getting user's blog for access denied message.
+	 *
+	 * @param array $args arguments for get_blogs_of_user function.
+	 */
+	$args = apply_filters( 'access_denied_splash_get_blogs_of_user_args', array() );
+	$blogs = get_blogs_of_user( get_current_user_id(), false, $args );
 
 	if ( wp_list_filter( $blogs, array( 'userblog_id' => get_current_blog_id() ) ) )
 		return;
@@ -848,28 +854,28 @@ function choose_primary_blog() {
 		<th scope="row"><label for="primary_blog"><?php _e( 'Primary Site' ); ?></label></th>
 		<td>
 		<?php
-		$all_blogs = get_blogs_of_user( get_current_user_id() );
+		$all_blogs_ids = get_blogs_of_user( get_current_user_id(), false, array( 'fields' => 'ids' ) );
 		$primary_blog = get_user_meta( get_current_user_id(), 'primary_blog', true );
-		if ( count( $all_blogs ) > 1 ) {
+		if ( count( $all_blogs_ids ) > 1 ) {
 			$found = false;
 			?>
 			<select name="primary_blog" id="primary_blog">
-				<?php foreach ( (array) $all_blogs as $blog ) {
-					if ( $primary_blog == $blog->userblog_id )
+				<?php foreach ( (array) $all_blogs_ids as $blog_id ) {
+					if ( $primary_blog == $blog_id )
 						$found = true;
-					?><option value="<?php echo $blog->userblog_id ?>"<?php selected( $primary_blog, $blog->userblog_id ); ?>><?php echo esc_url( get_home_url( $blog->userblog_id ) ) ?></option><?php
+					?><option value="<?php echo $blog_id ?>"<?php selected( $primary_blog, $blog_id ); ?>><?php echo esc_url( get_home_url( $blog_id ) ) ?></option><?php
 				} ?>
 			</select>
 			<?php
 			if ( !$found ) {
-				$blog = reset( $all_blogs );
-				update_user_meta( get_current_user_id(), 'primary_blog', $blog->userblog_id );
+				$blog_id = reset( $all_blogs_ids );
+				update_user_meta( get_current_user_id(), 'primary_blog', $blog_id );
 			}
-		} elseif ( count( $all_blogs ) == 1 ) {
-			$blog = reset( $all_blogs );
-			echo esc_url( get_home_url( $blog->userblog_id ) );
-			if ( $primary_blog != $blog->userblog_id ) // Set the primary blog again if it's out of sync with blog list.
-				update_user_meta( get_current_user_id(), 'primary_blog', $blog->userblog_id );
+		} elseif ( count( $all_blog_ids ) == 1 ) {
+			$blog_id = reset( $all_blog_ids );
+			echo esc_url( get_home_url( $blog_id ) );
+			if ( $primary_blog != $blog_id ) // Set the primary blog again if it's out of sync with blog list.
+				update_user_meta( get_current_user_id(), 'primary_blog', $blog_id );
 		} else {
 			echo "N/A";
 		}

@@ -572,7 +572,7 @@ function get_users( $args = array() ) {
  * @return array A list of the user's sites. An empty array if the user doesn't exist
  *               or belongs to no sites.
  */
-function get_blogs_of_user( $user_id, $all = false, $limit = 100) {
+function get_blogs_of_user( $user_id, $all = false, $args = false ) {
 	global $wpdb;
 
 	$user_id = (int) $user_id;
@@ -594,7 +594,7 @@ function get_blogs_of_user( $user_id, $all = false, $limit = 100) {
 	 * @param bool       $all     Whether the returned array should contain all sites, including
 	 *                            those marked 'deleted', 'archived', or 'spam'. Default false.
 	 */
-	$sites = apply_filters( 'pre_get_blogs_of_user', null, $user_id, $all );
+	$sites = apply_filters( 'pre_get_blogs_of_user', null, $user_id, $all, $args );
 
 	if ( null !== $sites ) {
 		return $sites;
@@ -640,34 +640,44 @@ function get_blogs_of_user( $user_id, $all = false, $limit = 100) {
 		$site_ids[] = (int) $site_id;
 	}
 
+	if( $all === 'all_ids' )
+		return $site_ids;
+
 	$sites = array();
 
 	if ( ! empty( $site_ids ) ) {
-		$args = array(
-			'number'   => $limit,
+		$default_args = array(
+			'number'   => '',
 			'site__in' => $site_ids,
 		);
 		if ( ! $all ) {
-			$args['archived'] = 0;
-			$args['spam']     = 0;
-			$args['deleted']  = 0;
+			$default_args['archived'] = 0;
+			$default_args['spam']     = 0;
+			$default_args['deleted']  = 0;
 		}
+
+		$args = wp_parse_args( $args, $default_args );
+		$args = apply_filters( 'get_blogs_of_user_get_sites_args', $args, $user_id, $all );
 
 		$_sites = get_sites( $args );
 
-		foreach ( $_sites as $site ) {
-			$sites[ $site->id ] = (object) array(
-				'userblog_id' => $site->id,
-				'blogname'    => $site->blogname,
-				'domain'      => $site->domain,
-				'path'        => $site->path,
-				'site_id'     => $site->network_id,
-				'siteurl'     => $site->siteurl,
-				'archived'    => $site->archived,
-				'mature'      => $site->mature,
-				'spam'        => $site->spam,
-				'deleted'     => $site->deleted,
-			);
+		if( isset( $args[ 'fields' ] ) && $args[ 'fields' ] === 'ids' ) {
+			return $_sites;
+		} else {	
+			foreach ( $_sites as $site ) {
+				$sites[ $site->id ] = (object) array(
+					'userblog_id' => $site->id,
+					'blogname'    => $site->blogname,
+					'domain'      => $site->domain,
+					'path'        => $site->path,
+					'site_id'     => $site->network_id,
+					'siteurl'     => $site->siteurl,
+					'archived'    => $site->archived,
+					'mature'      => $site->mature,
+					'spam'        => $site->spam,
+					'deleted'     => $site->deleted,
+				);
+			}
 		}
 	}
 
@@ -681,7 +691,7 @@ function get_blogs_of_user( $user_id, $all = false, $limit = 100) {
 	 * @param bool  $all     Whether the returned sites array should contain all sites, including
 	 *                       those marked 'deleted', 'archived', or 'spam'. Default false.
 	 */
-	return apply_filters( 'get_blogs_of_user', $sites, $user_id, $all );
+	return apply_filters( 'get_blogs_of_user', $sites, $user_id, $all, $args );
 }
 
 /**
