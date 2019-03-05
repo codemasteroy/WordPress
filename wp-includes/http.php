@@ -255,8 +255,9 @@ function wp_remote_retrieve_header( $response, $header ) {
  * @return int|string The response code as an integer. Empty string on incorrect parameter given.
  */
 function wp_remote_retrieve_response_code( $response ) {
-	if ( is_wp_error($response) || ! isset($response['response']) || ! is_array($response['response']))
+	if ( is_wp_error( $response ) || ! isset( $response['response'] ) || ! is_array( $response['response'] ) ) {
 		return '';
+	}
 
 	return $response['response']['code'];
 }
@@ -272,8 +273,9 @@ function wp_remote_retrieve_response_code( $response ) {
  * @return string The response message. Empty string on incorrect parameter given.
  */
 function wp_remote_retrieve_response_message( $response ) {
-	if ( is_wp_error($response) || ! isset($response['response']) || ! is_array($response['response']))
+	if ( is_wp_error( $response ) || ! isset( $response['response'] ) || ! is_array( $response['response'] ) ) {
 		return '';
+	}
 
 	return $response['response']['message'];
 }
@@ -287,8 +289,9 @@ function wp_remote_retrieve_response_message( $response ) {
  * @return string The body of the response. Empty string if no body or incorrect parameter given.
  */
 function wp_remote_retrieve_body( $response ) {
-	if ( is_wp_error($response) || ! isset($response['body']) )
+	if ( is_wp_error( $response ) || ! isset( $response['body'] ) ) {
 		return '';
+	}
 
 	return $response['body'];
 }
@@ -395,8 +398,9 @@ function wp_http_supports( $capabilities = array(), $url = null ) {
  */
 function get_http_origin() {
 	$origin = '';
-	if ( ! empty ( $_SERVER[ 'HTTP_ORIGIN' ] ) )
+	if ( ! empty( $_SERVER['HTTP_ORIGIN'] ) ) {
 		$origin = $_SERVER[ 'HTTP_ORIGIN' ];
+	}
 
 	/**
 	 * Change the origin of an HTTP request.
@@ -420,12 +424,14 @@ function get_allowed_http_origins() {
 	$home_origin = parse_url( home_url() );
 
 	// @todo preserve port?
-	$allowed_origins = array_unique( array(
+	$allowed_origins = array_unique(
+		array(
 		'http://' . $admin_origin[ 'host' ],
 		'https://' . $admin_origin[ 'host' ],
 		'http://' . $home_origin[ 'host' ],
 		'https://' . $home_origin[ 'host' ],
-	) );
+		)
+	);
 
 	/**
 	 * Change the origin types allowed for HTTP requests.
@@ -454,11 +460,13 @@ function get_allowed_http_origins() {
 function is_allowed_http_origin( $origin = null ) {
 	$origin_arg = $origin;
 
-	if ( null === $origin )
+	if ( null === $origin ) {
 		$origin = get_http_origin();
+	}
 
-	if ( $origin && ! in_array( $origin, get_allowed_http_origins() ) )
+	if ( $origin && ! in_array( $origin, get_allowed_http_origins() ) ) {
 		$origin = '';
+	}
 
 	/**
 	 * Change the allowed HTTP origin result.
@@ -490,8 +498,9 @@ function send_origin_headers() {
 	if ( is_allowed_http_origin( $origin ) ) {
 		@header( 'Access-Control-Allow-Origin: ' .  $origin );
 		@header( 'Access-Control-Allow-Credentials: true' );
-		if ( 'OPTIONS' === $_SERVER['REQUEST_METHOD'] )
+		if ( 'OPTIONS' === $_SERVER['REQUEST_METHOD'] ) {
 			exit;
+		}
 		return $origin;
 	}
 
@@ -514,18 +523,22 @@ function send_origin_headers() {
 function wp_http_validate_url( $url ) {
 	$original_url = $url;
 	$url = wp_kses_bad_protocol( $url, array( 'http', 'https' ) );
-	if ( ! $url || strtolower( $url ) !== strtolower( $original_url ) )
+	if ( ! $url || strtolower( $url ) !== strtolower( $original_url ) ) {
 		return false;
+	}
 
 	$parsed_url = @parse_url( $url );
-	if ( ! $parsed_url || empty( $parsed_url['host'] ) )
+	if ( ! $parsed_url || empty( $parsed_url['host'] ) ) {
 		return false;
+	}
 
-	if ( isset( $parsed_url['user'] ) || isset( $parsed_url['pass'] ) )
+	if ( isset( $parsed_url['user'] ) || isset( $parsed_url['pass'] ) ) {
 		return false;
+	}
 
-	if ( false !== strpbrk( $parsed_url['host'], ':#?[]' ) )
+	if ( false !== strpbrk( $parsed_url['host'], ':#?[]' ) ) {
 		return false;
+	}
 
 	$parsed_home = @parse_url( get_option( 'home' ) );
 
@@ -541,8 +554,9 @@ function wp_http_validate_url( $url ) {
 			$ip = $host;
 		} else {
 			$ip = gethostbyname( $host );
-			if ( $ip === $host ) // Error condition for gethostbyname()
+			if ( $ip === $host ) { // Error condition for gethostbyname()
 				$ip = false;
+		}
 		}
 		if ( $ip ) {
 			$parts = array_map( 'intval', explode( '.', $ip ) );
@@ -562,21 +576,25 @@ function wp_http_validate_url( $url ) {
 				 * @param string $host IP of the requested host.
 				 * @param string $url  URL of the requested host.
 				 */
-				if ( ! apply_filters( 'http_request_host_is_external', false, $host, $url ) )
+				if ( ! apply_filters( 'http_request_host_is_external', false, $host, $url ) ) {
 					return false;
 			}
 		}
 	}
+	}
 
-	if ( empty( $parsed_url['port'] ) )
+	if ( empty( $parsed_url['port'] ) ) {
 		return $url;
+	}
 
 	$port = $parsed_url['port'];
-	if ( 80 === $port || 443 === $port || 8080 === $port )
+	if ( 80 === $port || 443 === $port || 8080 === $port ) {
 		return $url;
+	}
 
-	if ( $parsed_home && $same_host && isset( $parsed_home['port'] ) && $parsed_home['port'] === $port )
+	if ( $parsed_home && $same_host && isset( $parsed_home['port'] ) && $parsed_home['port'] === $port ) {
 		return $url;
+	}
 
 	return false;
 }
@@ -593,8 +611,9 @@ function wp_http_validate_url( $url ) {
  * @return bool
  */
 function allowed_http_request_hosts( $is_external, $host ) {
-	if ( ! $is_external && wp_validate_redirect( 'http://' . $host ) )
+	if ( ! $is_external && wp_validate_redirect( 'http://' . $host ) ) {
 		$is_external = true;
+	}
 	return $is_external;
 }
 
@@ -615,12 +634,15 @@ function allowed_http_request_hosts( $is_external, $host ) {
 function ms_allowed_http_request_hosts( $is_external, $host ) {
 	global $wpdb;
 	static $queried = array();
-	if ( $is_external )
+	if ( $is_external ) {
 		return $is_external;
-	if ( $host === get_network()->domain )
+	}
+	if ( $host === get_network()->domain ) {
 		return true;
-	if ( isset( $queried[ $host ] ) )
+	}
+	if ( isset( $queried[ $host ] ) ) {
 		return $queried[ $host ];
+	}
 	$queried[ $host ] = (bool) $wpdb->get_var( $wpdb->prepare( "SELECT domain FROM $wpdb->blogs WHERE domain = %s LIMIT 1", $host ) );
 	return $queried[ $host ];
 }
@@ -641,13 +663,14 @@ function ms_allowed_http_request_hosts( $is_external, $host ) {
  * when URL parsing failed.
  *
  * @since 4.4.0
- * @since 4.7.0 The $component parameter was added for parity with PHP's parse_url().
+ * @since 4.7.0 The `$component` parameter was added for parity with PHP's `parse_url()`.
+ *
+ * @link https://secure.php.net/manual/en/function.parse-url.php
  *
  * @param string $url       The URL to parse.
  * @param int    $component The specific component to retrieve. Use one of the PHP
  *                          predefined constants to specify which one.
  *                          Defaults to -1 (= return all parts as an array).
- *                          @see http://php.net/manual/en/function.parse-url.php
  * @return mixed False on parse failure; Array of URL components on success;
  *               When a specific component has been requested: null if the component
  *               doesn't exist in the given URL; a string or - in the case of
@@ -687,12 +710,14 @@ function wp_parse_url( $url, $component = -1 ) {
  * @internal
  *
  * @since 4.7.0
+ * @access private
+ *
+ * @link https://secure.php.net/manual/en/function.parse-url.php
  *
  * @param array|false $url_parts The parsed URL. Can be false if the URL failed to parse.
  * @param int    $component The specific component to retrieve. Use one of the PHP
  *                          predefined constants to specify which one.
  *                          Defaults to -1 (= return all parts as an array).
- *                          @see http://php.net/manual/en/function.parse-url.php
  * @return mixed False on parse failure; Array of URL components on success;
  *               When a specific component has been requested: null if the component
  *               doesn't exist in the given URL; a string or - in the case of
@@ -717,8 +742,9 @@ function _get_component_from_parsed_url_array( $url_parts, $component = -1 ) {
  * @internal
  *
  * @since 4.7.0
+ * @access private
  *
- * @see   http://php.net/manual/en/url.constants.php
+ * @link https://secure.php.net/manual/en/url.constants.php
  *
  * @param int $constant PHP_URL_* constant.
  * @return string|bool The named key or false.

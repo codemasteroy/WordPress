@@ -49,7 +49,7 @@ nocache_headers();
 $step = isset( $_GET['step'] ) ? (int) $_GET['step'] : 0;
 
 /**
- * Display install header.
+ * Display installation header.
  *
  * @since 2.5.0
  *
@@ -76,8 +76,8 @@ function display_header( $body_classes = '' ) {
 		wp_admin_css( 'dashicons', true );
 	?>
 </head>
-<body class="wp-core-ui<?php echo $body_classes ?>">
-<p id="logo"><a href="<?php echo esc_url( __( 'https://wordpress.org/' ) ); ?>" tabindex="-1"><?php _e( 'WordPress' ); ?></a></p>
+<body class="wp-core-ui<?php echo $body_classes; ?>">
+<p id="logo"><a href="<?php echo esc_url( __( 'https://wordpress.org/' ) ); ?>"><?php _e( 'WordPress' ); ?></a></p>
 
 <?php
 } // end display_header()
@@ -87,12 +87,14 @@ function display_header( $body_classes = '' ) {
  *
  * @since 2.8.0
  *
+ * @global wpdb $wpdb WordPress database abstraction object.
+ *
  * @param string|null $error
  */
 function display_setup_form( $error = null ) {
 	global $wpdb;
 
-	$sql = $wpdb->prepare( "SHOW TABLES LIKE %s", $wpdb->esc_like( $wpdb->users ) );
+	$sql        = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $wpdb->users ) );
 	$user_table = ( $wpdb->get_var( $sql ) != null );
 
 	// Ensure that Blogs appear in search engines by default.
@@ -124,10 +126,12 @@ function display_setup_form( $error = null ) {
 				_e('User(s) already exists.');
 				echo '<input name="user_name" type="hidden" value="admin" />';
 			} else {
-				?><input name="user_name" type="text" id="user_login" size="25" value="<?php echo esc_attr( sanitize_user( $user_name, true ) ); ?>" />
+				?>
+				<input name="user_name" type="text" id="user_login" size="25" value="<?php echo esc_attr( sanitize_user( $user_name, true ) ); ?>" />
 				<p><?php _e( 'Usernames can have only alphanumeric characters, spaces, underscores, hyphens, periods, and the @ symbol.' ); ?></p>
 			<?php
-			} ?>
+			}
+			?>
 			</td>
 		</tr>
 		<?php if ( ! $user_table ) : ?>
@@ -184,7 +188,8 @@ function display_setup_form( $error = null ) {
 				<fieldset>
 					<legend class="screen-reader-text"><span><?php has_action( 'blog_privacy_selector' ) ? _e( 'Site Visibility' ) : _e( 'Search Engine Visibility' ); ?> </span></legend>
 					<?php
-					if ( has_action( 'blog_privacy_selector' ) ) { ?>
+					if ( has_action( 'blog_privacy_selector' ) ) {
+						?>
 						<input id="blog-public" type="radio" name="blog_public" value="1" <?php checked( 1, $blog_public ); ?> />
 						<label for="blog-public"><?php _e( 'Allow search engines to index this site' );?></label><br/>
 						<input id="blog-norobots" type="radio" name="blog_public" value="0" <?php checked( 0, $blog_public ); ?> />
@@ -193,7 +198,8 @@ function display_setup_form( $error = null ) {
 						<?php
 						/** This action is documented in wp-admin/options-reading.php */
 						do_action( 'blog_privacy_selector' );
-					 } else { ?>
+					} else {
+						?>
 						<label for="blog_public"><input name="blog_public" type="checkbox" id="blog_public" value="0" <?php checked( 0, $blog_public ); ?> />
 						<?php _e( 'Discourage search engines from indexing this site' ); ?></label>
 						<p class="description"><?php _e( 'It is up to search engines to honor this request.' ); ?></p>
@@ -232,15 +238,21 @@ $mysql_version  = $wpdb->db_version();
 $php_compat     = version_compare( $php_version, $required_php_version, '>=' );
 $mysql_compat   = version_compare( $mysql_version, $required_mysql_version, '>=' ) || file_exists( WP_CONTENT_DIR . '/db.php' );
 
+$version_url = sprintf(
+	/* translators: %s: WordPress version */
+	esc_url( __( 'https://wordpress.org/support/wordpress-version/version-%s/' ) ),
+	sanitize_title( $wp_version )
+);
+
 if ( !$mysql_compat && !$php_compat ) {
-	/* translators: 1: WordPress version number, 2: Minimum required PHP version number, 3: Minimum required MySQL version number, 4: Current PHP version number, 5: Current MySQL version number */
-	$compat = sprintf( __( 'You cannot install because <a href="https://codex.wordpress.org/Version_%1$s">WordPress %1$s</a> requires PHP version %2$s or higher and MySQL version %3$s or higher. You are running PHP version %4$s and MySQL version %5$s.' ), $wp_version, $required_php_version, $required_mysql_version, $php_version, $mysql_version );
+	/* translators: 1: URL to WordPress release notes, 2: WordPress version number, 3: Minimum required PHP version number, 4: Minimum required MySQL version number, 5: Current PHP version number, 6: Current MySQL version number */
+	$compat = sprintf( __( 'You cannot install because <a href="%1$s">WordPress %2$s</a> requires PHP version %3$s or higher and MySQL version %4$s or higher. You are running PHP version %5$s and MySQL version %6$s.' ), $version_url, $wp_version, $required_php_version, $required_mysql_version, $php_version, $mysql_version );
 } elseif ( !$php_compat ) {
-	/* translators: 1: WordPress version number, 2: Minimum required PHP version number, 3: Current PHP version number */
-	$compat = sprintf( __( 'You cannot install because <a href="https://codex.wordpress.org/Version_%1$s">WordPress %1$s</a> requires PHP version %2$s or higher. You are running version %3$s.' ), $wp_version, $required_php_version, $php_version );
+	/* translators: 1: URL to WordPress release notes, 2: WordPress version number, 3: Minimum required PHP version number, 4: Current PHP version number */
+	$compat = sprintf( __( 'You cannot install because <a href="%1$s">WordPress %2$s</a> requires PHP version %3$s or higher. You are running version %4$s.' ), $version_url, $wp_version, $required_php_version, $php_version );
 } elseif ( !$mysql_compat ) {
-	/* translators: 1: WordPress version number, 2: Minimum required MySQL version number, 3: Current MySQL version number */
-	$compat = sprintf( __( 'You cannot install because <a href="https://codex.wordpress.org/Version_%1$s">WordPress %1$s</a> requires MySQL version %2$s or higher. You are running version %3$s.' ), $wp_version, $required_mysql_version, $mysql_version );
+	/* translators: 1: URL to WordPress release notes, 2: WordPress version number, 3: Minimum required MySQL version number, 4: Current MySQL version number */
+	$compat = sprintf( __( 'You cannot install because <a href="%1$s">WordPress %2$s</a> requires MySQL version %3$s or higher. You are running version %4$s.' ), $version_url, $wp_version, $required_mysql_version, $mysql_version );
 }
 
 if ( !$mysql_compat || !$php_compat ) {
@@ -329,8 +341,9 @@ switch($step) {
 			$loaded_language = 'en_US';
 		}
 
-		if ( ! empty( $wpdb->error ) )
+		if ( ! empty( $wpdb->error ) ) {
 			wp_die( $wpdb->error->get_error_message() );
+		}
 
 		$scripts_to_print[] = 'user-profile';
 
@@ -382,11 +395,13 @@ switch($step) {
 	</tr>
 	<tr>
 		<th><?php _e( 'Password' ); ?></th>
-		<td><?php
-		if ( ! empty( $result['password'] ) && empty( $admin_password_check ) ): ?>
-			<code><?php echo esc_html( $result['password'] ) ?></code><br />
+		<td>
+			<?php
+			if ( ! empty( $result['password'] ) && empty( $admin_password_check ) ) :
+				?>
+			<code><?php echo esc_html( $result['password'] ); ?></code><br />
 		<?php endif ?>
-			<p><?php echo $result['password_message'] ?></p>
+			<p><?php echo $result['password_message']; ?></p>
 		</td>
 	</tr>
 </table>

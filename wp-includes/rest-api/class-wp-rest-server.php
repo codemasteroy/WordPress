@@ -58,7 +58,6 @@ class WP_REST_Server {
 	 * Namespaces registered to the server.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 * @var array
 	 */
 	protected $namespaces = array();
@@ -67,7 +66,6 @@ class WP_REST_Server {
 	 * Endpoints registered to the server.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 * @var array
 	 */
 	protected $endpoints = array();
@@ -76,7 +74,6 @@ class WP_REST_Server {
 	 * Options defined for the routes.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 * @var array
 	 */
 	protected $route_options = array();
@@ -85,7 +82,6 @@ class WP_REST_Server {
 	 * Instantiates the REST server.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 */
 	public function __construct() {
 		$this->endpoints = array(
@@ -107,7 +103,6 @@ class WP_REST_Server {
 	 * Checks the authentication headers if supplied.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @return WP_Error|null WP_Error indicates unsuccessful login, null indicates successful
 	 *                       or no authentication provided
@@ -148,7 +143,6 @@ class WP_REST_Server {
 	 * list in JSON rather than an object/map.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @param WP_Error $error WP_Error instance.
 	 * @return WP_REST_Response List of associative arrays with code and message keys.
@@ -166,7 +160,11 @@ class WP_REST_Server {
 
 		foreach ( (array) $error->errors as $code => $messages ) {
 			foreach ( (array) $messages as $message ) {
-				$errors[] = array( 'code' => $code, 'message' => $message, 'data' => $error->get_error_data( $code ) );
+				$errors[] = array(
+					'code'    => $code,
+					'message' => $message,
+					'data'    => $error->get_error_data( $code ),
+				);
 			}
 		}
 
@@ -191,7 +189,6 @@ class WP_REST_Server {
 	 * a 'status' key, with the value being the HTTP status to send.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @param string $code    WP_Error-style code.
 	 * @param string $message Human-readable message.
@@ -215,7 +212,6 @@ class WP_REST_Server {
 	 * callback then outputs a JSON representation of the returned value.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @see WP_REST_Server::dispatch()
 	 *
@@ -268,7 +264,11 @@ class WP_REST_Server {
 		 *
 		 * @param bool $rest_enabled Whether the REST API is enabled. Default true.
 		 */
-		apply_filters_deprecated( 'rest_enabled', array( true ), '4.7.0', 'rest_authentication_errors',
+		apply_filters_deprecated(
+			'rest_enabled',
+			array( true ),
+			'4.7.0',
+			'rest_authentication_errors',
 			__( 'The REST API can no longer be completely disabled, the rest_authentication_errors filter can be used to restrict access to the API, instead.' )
 		);
 
@@ -425,7 +425,6 @@ class WP_REST_Server {
 	 * Converts a response to data to send.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param WP_REST_Response $response Response object.
 	 * @param bool             $embed    Whether links should be embedded.
@@ -463,8 +462,6 @@ class WP_REST_Server {
 	 * direct output.
 	 *
 	 * @since 4.4.0
-	 * @access public
-	 * @static
 	 *
 	 * @param WP_REST_Response $response Response to extract links from.
 	 * @return array Map of link relation to list of link hashes.
@@ -497,8 +494,6 @@ class WP_REST_Server {
 	 * direct output.
 	 *
 	 * @since 4.5.0
-	 * @access public
-	 * @static
 	 *
 	 * @param WP_REST_Response $response Response to extract links from.
 	 * @return array Map of link relation to list of link hashes.
@@ -547,7 +542,6 @@ class WP_REST_Server {
 	 * Embeds the links from the data into the request.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @param array $data Data from the request.
 	 * @return array {
@@ -623,7 +617,6 @@ class WP_REST_Server {
 	 * data instead.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param WP_REST_Response $response Response object.
 	 * @param bool             $embed    Whether links should be embedded.
@@ -654,7 +647,6 @@ class WP_REST_Server {
 	 * Registers a route to the server.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param string $namespace  Namespace.
 	 * @param string $route      The REST route.
@@ -666,7 +658,10 @@ class WP_REST_Server {
 		if ( ! isset( $this->namespaces[ $namespace ] ) ) {
 			$this->namespaces[ $namespace ] = array();
 
-			$this->register_route( $namespace, '/' . $namespace, array(
+			$this->register_route(
+				$namespace,
+				'/' . $namespace,
+				array(
 				array(
 					'methods' => self::READABLE,
 					'callback' => array( $this, 'get_namespace_index' ),
@@ -679,7 +674,8 @@ class WP_REST_Server {
 						),
 					),
 				),
-			) );
+				)
+			);
 		}
 
 		// Associative to avoid double-registration.
@@ -709,7 +705,6 @@ class WP_REST_Server {
 	 * used as the delimiter with preg_match()
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @return array `'/path/regex' => array( $callback, $bitmask )` or
 	 *               `'/path/regex' => array( array( $callback, $bitmask ), ...)`.
@@ -784,7 +779,6 @@ class WP_REST_Server {
 	 * Retrieves namespaces registered on the server.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @return array List of registered namespaces.
 	 */
@@ -796,7 +790,6 @@ class WP_REST_Server {
 	 * Retrieves specified options for a route.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param string $route Route pattern to fetch options for.
 	 * @return array|null Data as an associative array if found, or null if not found.
@@ -813,7 +806,6 @@ class WP_REST_Server {
 	 * Matches the request to a callback and call it.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param WP_REST_Request $request Request to attempt dispatching.
 	 * @return WP_REST_Response Response returned by the callback.
@@ -842,10 +834,17 @@ class WP_REST_Server {
 		$path   = $request->get_route();
 
 		foreach ( $this->get_routes() as $route => $handlers ) {
-			$match = preg_match( '@^' . $route . '$@i', $path, $args );
+			$match = preg_match( '@^' . $route . '$@i', $path, $matches );
 
 			if ( ! $match ) {
 				continue;
+			}
+
+			$args = array();
+			foreach ( $matches as $param => $value ) {
+				if ( ! is_int( $param ) ) {
+					$args[ $param ] = $value;
+				}
 			}
 
 			foreach ( $handlers as $handler ) {
@@ -905,8 +904,8 @@ class WP_REST_Server {
 				 *
 				 * @since 4.7.0
 				 *
-				 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
-				 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+				 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
+				 * @param array                     $handler  Route handler used for the request.
 				 * @param WP_REST_Request  $request  Request used to generate the response.
 				 */
 				$response = apply_filters( 'rest_request_before_callbacks', $response, $handler, $request );
@@ -919,7 +918,7 @@ class WP_REST_Server {
 						if ( is_wp_error( $permission ) ) {
 							$response = $permission;
 						} elseif ( false === $permission || null === $permission ) {
-							$response = new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to do that.' ), array( 'status' => 403 ) );
+							$response = new WP_Error( 'rest_forbidden', __( 'Sorry, you are not allowed to do that.' ), array( 'status' => rest_authorization_required_code() ) );
 						}
 					}
 				}
@@ -933,7 +932,7 @@ class WP_REST_Server {
 					 * @since 4.4.0
 					 * @since 4.5.0 Added `$route` and `$handler` parameters.
 					 *
-					 * @param bool            $dispatch_result Dispatch result, will be used if not empty.
+					 * @param mixed           $dispatch_result Dispatch result, will be used if not empty.
 					 * @param WP_REST_Request $request         Request used to generate the response.
 					 * @param string          $route           Route matched for the request.
 					 * @param array           $handler         Route handler used for the request.
@@ -964,8 +963,8 @@ class WP_REST_Server {
 				 *
 				 * @since 4.7.0
 				 *
-				 * @param WP_HTTP_Response $response Result to send to the client. Usually a WP_REST_Response.
-				 * @param WP_REST_Server   $handler  ResponseHandler instance (usually WP_REST_Server).
+				 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
+				 * @param array                     $handler  Route handler used for the request.
 				 * @param WP_REST_Request  $request  Request used to generate the response.
 				 */
 				$response = apply_filters( 'rest_request_after_callbacks', $response, $handler, $request );
@@ -993,7 +992,6 @@ class WP_REST_Server {
 	 * "Encoding error: Maximum stack depth exceeded".
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @return bool|string Boolean false or string error message.
 	 */
@@ -1018,7 +1016,6 @@ class WP_REST_Server {
 	 * This endpoint describes the capabilities of the site.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param array $request {
 	 *     Request.
@@ -1063,7 +1060,6 @@ class WP_REST_Server {
 	 * Retrieves the index for a namespace.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param WP_REST_Request $request REST request instance.
 	 * @return WP_REST_Response|WP_Error WP_REST_Response instance if the index was found,
@@ -1106,7 +1102,6 @@ class WP_REST_Server {
 	 * Retrieves the publicly-visible data for routes.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param array  $routes  Routes to get data for.
 	 * @param string $context Optional. Context for data. Accepts 'view' or 'help'. Default 'view'.
@@ -1151,7 +1146,6 @@ class WP_REST_Server {
 	 * Retrieves publicly-visible data for the route.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param string $route     Route to get data for.
 	 * @param array  $callbacks Callbacks to convert to data.
@@ -1237,7 +1231,6 @@ class WP_REST_Server {
 	 * Sends an HTTP status code.
 	 *
 	 * @since 4.4.0
-	 * @access protected
 	 *
 	 * @param int $code HTTP status.
 	 */
@@ -1249,7 +1242,6 @@ class WP_REST_Server {
 	 * Sends an HTTP header.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param string $key Header key.
 	 * @param string $value Header value.
@@ -1270,7 +1262,6 @@ class WP_REST_Server {
 	 * Sends multiple HTTP headers.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param array $headers Map of header name to header value.
 	 */
@@ -1284,7 +1275,6 @@ class WP_REST_Server {
 	 * Removes an HTTP header from the current response.
 	 *
 	 * @since 4.8.0
-	 * @access public
 	 *
 	 * @param string $key Header key.
 	 */
@@ -1308,7 +1298,6 @@ class WP_REST_Server {
 	 * Retrieves the raw request entity (body).
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @global string $HTTP_RAW_POST_DATA Raw post data.
 	 *
@@ -1332,7 +1321,6 @@ class WP_REST_Server {
 	 * Extracts headers from a PHP-style $_SERVER array.
 	 *
 	 * @since 4.4.0
-	 * @access public
 	 *
 	 * @param array $server Associative array similar to `$_SERVER`.
 	 * @return array Headers extracted from the input.
@@ -1341,7 +1329,11 @@ class WP_REST_Server {
 		$headers = array();
 
 		// CONTENT_* headers are not prefixed with HTTP_.
-		$additional = array( 'CONTENT_LENGTH' => true, 'CONTENT_MD5' => true, 'CONTENT_TYPE' => true );
+		$additional = array(
+			'CONTENT_LENGTH' => true,
+			'CONTENT_MD5'    => true,
+			'CONTENT_TYPE'   => true,
+		);
 
 		foreach ( $server as $key => $value ) {
 			if ( strpos( $key, 'HTTP_' ) === 0 ) {
