@@ -40,7 +40,7 @@ function get_sitestats() {
 function get_active_blog_for_user( $user_id ) {
 	global $wpdb;
 	$blogs_ids = get_blogs_of_user( $user_id, false, array( 'fields' => 'ids' ) );
-	if ( empty( $blogs_ids ) )
+	if ( empty( $blogs_ids ) ) {
 		return;
 	}
 
