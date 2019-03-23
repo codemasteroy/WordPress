@@ -19,22 +19,15 @@ if ( ! current_user_can( 'read' ) ) {
 
 $action = isset( $_POST['action'] ) ? $_POST['action'] : 'splash';
 
-$blogs_ids = get_blogs_of_user( $current_user->ID, false, array( 'fields' => 'ids' ) );
+$blogs = get_blogs_of_user( $current_user->ID );
 
 $updated = false;
-if ( 'updateblogsettings' == $action && ( isset( $_POST['primary_blog'] ) || isset( $_POST['primary_blog_name'] ) ) ) {
+if ( 'updateblogsettings' == $action && isset( $_POST['primary_blog'] ) ) {
 	check_admin_referer( 'update-my-sites' );
 
-	if ( isset( $_POST['primary_blog'] ) && intval( $_POST['primary_blog'] ) > 0 ) {
 	$blog = get_site( (int) $_POST['primary_blog'] );
-	} elseif ( isset( $_POST['primary_blog_name'] ) && !empty( $_POST['primary_blog_name'] ) ) {
-		$site_url_parts = parse_url( $_POST['primary_blog_name'] );
-		if ( $site_url_parts ) {
-			$blog = get_site_by_path( $site_url_parts['host'], $site_url_parts['path'] );
-		}
-	}
 	if ( $blog && isset( $blog->domain ) ) {
-		update_user_option( $current_user->ID, 'primary_blog', $blog->blog_id, true );
+		update_user_option( $current_user->ID, 'primary_blog', (int) $_POST['primary_blog'], true );
 		$updated = true;
 	} else {
 		wp_die( __( 'The primary site you chose does not exist.' ) );
@@ -79,7 +72,7 @@ if ( in_array( get_site_option( 'registration' ), array( 'all', 'blog' ) ) ) {
 	printf( ' <a href="%s" class="page-title-action">%s</a>', esc_url( $sign_up_url ), esc_html_x( 'Add New', 'site' ) );
 }
 
-if ( empty( $blogs_ids ) ) :
+if ( empty( $blogs ) ) :
 	echo '<p>';
 	_e( 'You must be a member of at least one site to use this page.' );
 	echo '</p>';
@@ -91,48 +84,15 @@ else :
 <form id="myblogs" method="post">
 	<?php
 	choose_primary_blog();
-	submit_button();
 	/**
-	 * Fires before the sites table on the My Sites screen.
+	 * Fires before the sites list on the My Sites screen.
 	 *
 	 * @since 3.0.0
 	 */
 	do_action( 'myblogs_allblogs_options' );
-
-?>
-	<input type="hidden" name="action" value="updateblogsettings" />
-	<?php wp_nonce_field( 'update-my-sites' ); ?>
-
-<div class="tablenav">
-<?php
-	// Pagination start
-	$per_page = !isset($per_page) ? 10 : $per_page;
-	$total_blogs = count( $blogs_ids );
-
-	$current_page = ( isset( $_GET['paged'] ) && intval( $_GET['paged'] ) > 0 ) ? intval( $_GET['paged'] ) : 1;
-	$page_start = ( ( $current_page - 1 ) * $per_page );
-
-	$blogs = get_blogs_of_user( $current_user->ID, false, array( 'number' => $per_page, 'offset' => $page_start ) );
-	// Pagination end
-
-	$page_links = paginate_links( array(
-		'base' => add_query_arg( 'paged', '%#%' ),
-		'format' => '',
-		'prev_text' => __('&laquo;'),
-		'next_text' => __('&raquo;'),
-		'total' => ceil($total_blogs / $per_page),
-		'current' => $current_page
-	));
-
-	if ( $page_links )
-		echo "<div class='tablenav-pages'>$page_links</div>";
-
-	do_action( 'myblogs_bulk_actions' );
-
 	?>
 	<br clear="all" />
-</div>
-	<table class="widefat fixed">
+	<ul class="my-sites striped">
 	<?php
 	/**
 	 * Enable the Global Settings section on the My Sites screen.
@@ -148,23 +108,10 @@ else :
 	 */
 	$settings_html = apply_filters( 'myblogs_options', '', 'global' );
 	if ( $settings_html != '' ) {
-		echo '<tr><td valign="top"><h3>' . __( 'Global Settings' ) . '</h3></td><td>';
+		echo '<h3>' . __( 'Global Settings' ) . '</h3>';
 		echo $settings_html;
-		echo '</td></tr>';
 	}
 	reset( $blogs );
-	$num = count( $blogs );
-	$cols = 1;
-	if ( $num >= 20 )
-		$cols = 4;
-	elseif ( $num >= 10 )
-		$cols = 2;
-	$num_rows = ceil( $num / $cols );
-	$split = 0;
-	for ( $i = 1; $i <= $num_rows; $i++ ) {
-		$rows[] = array_slice( $blogs, $split, $cols );
-		$split = $split + $cols;
-	}
 
 	foreach ( $blogs as $user_blog ) {
 		switch_to_blog( $user_blog->userblog_id );
@@ -206,9 +153,6 @@ else :
 		submit_button();
 	}
 	?>
-	</div>
-	<input type="hidden" name="action" value="updateblogsettings" />
-	<?php wp_nonce_field( 'update-my-sites' ); ?>
 	</form>
 <?php endif; ?>
 	</div>
