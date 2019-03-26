@@ -449,15 +449,13 @@ function wp_admin_bar_customize_menu( $wp_admin_bar ) {
  * @param WP_Admin_Bar $wp_admin_bar
  */
 function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
-	global $current_user;
-
 	// Don't show for logged out users or single site mode.
 	if ( ! is_user_logged_in() || ! is_multisite() ) {
 		return;
 	}
 
 	// Show only when the user has at least one site, or they're a super admin.
-	if ( count( $wp_admin_bar->user->blogs_ids ) < 1 && ! current_user_can( 'manage_network' ) ) {
+	if ( count( $wp_admin_bar->user->blogs ) < 1 && ! current_user_can( 'manage_network' ) ) {
 		return;
 	}
 
@@ -568,23 +566,8 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		)
 	);
 
-	if ( count( $wp_admin_bar->user->blogs_ids ) > 15 ) {
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'my-sites-list',
-			'id'    => 'my-sites-list-all',
-			'title' => __( 'See All' ),
-			'href'  => get_admin_url( get_user_meta($current_user->ID, 'primary_blog', true), 'my-sites.php' ),
-		) );
-	}
-
-	$_my_blog_count = 0;
-
-	foreach ( (array) $wp_admin_bar->user->blogs_ids as $blog_id ) {
-		if ($_my_blog_count == 14)
-			break;
-
-		switch_to_blog( $blog_id );
-		$blog = get_blog_details( $blog_id );
+	foreach ( (array) $wp_admin_bar->user->blogs as $blog ) {
+		switch_to_blog( $blog->userblog_id );
 
 		$blavatar = '<div class="blavatar"></div>';
 
@@ -657,8 +640,6 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		);
 
 		restore_current_blog();
-
-		$_my_blog_count++;
 	}
 }
 
@@ -904,11 +885,15 @@ function wp_admin_bar_comments_menu( $wp_admin_bar ) {
 
 	$awaiting_mod  = wp_count_comments();
 	$awaiting_mod  = $awaiting_mod->moderated;
-	$awaiting_text = sprintf( _n( '%s comment awaiting moderation', '%s comments awaiting moderation', $awaiting_mod ), number_format_i18n( $awaiting_mod ) );
+	$awaiting_text = sprintf(
+		/* translators: %s: number of comments in moderation */
+		_n( '%s Comment in moderation', '%s Comments in moderation', $awaiting_mod ),
+		number_format_i18n( $awaiting_mod )
+	);
 
 	$icon   = '<span class="ab-icon"></span>';
 	$title  = '<span class="ab-label awaiting-mod pending-count count-' . $awaiting_mod . '" aria-hidden="true">' . number_format_i18n( $awaiting_mod ) . '</span>';
-	$title .= '<span class="screen-reader-text">' . $awaiting_text . '</span>';
+	$title .= '<span class="screen-reader-text comments-in-moderation-text">' . $awaiting_text . '</span>';
 
 	$wp_admin_bar->add_menu(
 		array(
@@ -1057,6 +1042,35 @@ function wp_admin_bar_search_menu( $wp_admin_bar ) {
 			'meta'   => array(
 				'class'    => 'admin-bar-search',
 				'tabindex' => -1,
+			),
+		)
+	);
+}
+
+/**
+ * Add a link to exit recovery mode when Recovery Mode is active.
+ *
+ * @since 5.2.0
+ *
+ * @param WP_Admin_Bar $wp_admin_bar
+ */
+function wp_admin_bar_recovery_mode_menu( $wp_admin_bar ) {
+	if ( ! wp_is_recovery_mode() ) {
+		return;
+	}
+
+	$url = wp_login_url();
+	$url = add_query_arg( 'action', WP_Recovery_Mode::EXIT_ACTION, $url );
+	$url = wp_nonce_url( $url, WP_Recovery_Mode::EXIT_ACTION );
+
+	$wp_admin_bar->add_menu(
+		array(
+			'parent' => 'top-secondary',
+			'id'     => 'recovery-mode',
+			'title'  => __( 'Exit Recovery Mode' ),
+			'href'   => $url,
+			'meta'   => array(
+				'title' => __( 'Exit Recovery Mode' ),
 			),
 		)
 	);
