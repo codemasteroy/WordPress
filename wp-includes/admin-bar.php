@@ -457,7 +457,7 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 	}
 
 	// Show only when the user has at least one site, or they're a super admin.
-	if ( count( $wp_admin_bar->user->blogs ) < 1 && ! current_user_can( 'manage_network' ) ) {
+	if ( count( $wp_admin_bar->user->blogs_ids ) < 1 && ! current_user_can( 'manage_network' ) ) {
 		return;
 	}
 
@@ -568,7 +568,7 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 		)
 	);
 
-	if ( count( $wp_admin_bar->user->blogs ) > 15 ) {
+	if ( count( $wp_admin_bar->user->blogs_ids ) > 15 ) {
 		$wp_admin_bar->add_menu( array(
 			'parent' => 'my-sites-list',
 			'id'    => 'my-sites-list-all',
@@ -579,11 +579,12 @@ function wp_admin_bar_my_sites_menu( $wp_admin_bar ) {
 
 	$_my_blog_count = 0;
 
-	foreach ( (array) $wp_admin_bar->user->blogs as $blog ) {
+	foreach ( (array) $wp_admin_bar->user->blogs_ids as $blog_id ) {
 		if ($_my_blog_count == 14)
 			break;
 
-		switch_to_blog( $blog->userblog_id );
+		switch_to_blog( $blog_id );
+		$blog = get_blog_details( $blog_id );
 
 		$blavatar = '<div class="blavatar"></div>';
 
