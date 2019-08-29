@@ -237,8 +237,7 @@ function get_site_by_path( $domain, $path, $segments = null ) {
 	}
 
 	$args = array(
-		'number'                 => 1,
-		'update_site_meta_cache' => false,
+		'number' => 1,
 	);
 
 	if ( count( $domains ) > 1 ) {
