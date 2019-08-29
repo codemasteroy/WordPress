@@ -683,8 +683,9 @@ function get_blogs_of_user( $user_id, $all = false, $args = false ) {
 
 	if ( ! empty( $site_ids ) ) {
 		$default_args = array(
-			'number'   => '',
-			'site__in' => $site_ids,
+			'number'                 => '',
+			'site__in'               => $site_ids,
+			'update_site_meta_cache' => false,
 		);
 		if ( ! $all ) {
 			$default_args['archived'] = 0;
@@ -699,7 +700,7 @@ function get_blogs_of_user( $user_id, $all = false, $args = false ) {
 
 		if( isset( $args[ 'fields' ] ) && $args[ 'fields' ] === 'ids' ) {
 			return $_sites;
-		} else {	
+		} else {
 			foreach ( $_sites as $site ) {
 				$sites[ $site->id ] = (object) array(
 					'userblog_id' => $site->id,
