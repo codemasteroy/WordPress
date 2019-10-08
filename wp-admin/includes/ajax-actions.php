@@ -2300,10 +2300,10 @@ function wp_ajax_upload_attachment() {
 	if ( ! current_user_can( 'upload_files' ) ) {
 		echo wp_json_encode(
 			array(
-			'success' => false,
-			'data'    => array(
-				'message'  => __( 'Sorry, you are not allowed to upload files.' ),
-				'filename' => $_FILES['async-upload']['name'],
+				'success' => false,
+				'data'    => array(
+					'message'  => __( 'Sorry, you are not allowed to upload files.' ),
+					'filename' => esc_html( $_FILES['async-upload']['name'] ),
 				),
 			)
 		);
@@ -2316,10 +2316,10 @@ function wp_ajax_upload_attachment() {
 		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			echo wp_json_encode(
 				array(
-				'success' => false,
-				'data'    => array(
-					'message'  => __( 'Sorry, you are not allowed to attach files to this post.' ),
-					'filename' => $_FILES['async-upload']['name'],
+					'success' => false,
+					'data'    => array(
+						'message'  => __( 'Sorry, you are not allowed to attach files to this post.' ),
+						'filename' => esc_html( $_FILES['async-upload']['name'] ),
 					),
 				)
 			);
@@ -2342,10 +2342,10 @@ function wp_ajax_upload_attachment() {
 		if ( ! wp_match_mime_types( 'image', $wp_filetype['type'] ) ) {
 			echo wp_json_encode(
 				array(
-				'success' => false,
-				'data'    => array(
-					'message'  => __( 'The uploaded file is not a valid image. Please try again.' ),
-					'filename' => $_FILES['async-upload']['name'],
+					'success' => false,
+					'data'    => array(
+						'message'  => __( 'The uploaded file is not a valid image. Please try again.' ),
+						'filename' => esc_html( $_FILES['async-upload']['name'] ),
 					),
 				)
 			);
@@ -2359,10 +2359,10 @@ function wp_ajax_upload_attachment() {
 	if ( is_wp_error( $attachment_id ) ) {
 		echo wp_json_encode(
 			array(
-			'success' => false,
-			'data'    => array(
-				'message'  => $attachment_id->get_error_message(),
-				'filename' => $_FILES['async-upload']['name'],
+				'success' => false,
+				'data'    => array(
+					'message'  => $attachment_id->get_error_message(),
+					'filename' => esc_html( $_FILES['async-upload']['name'] ),
 				),
 			)
 		);
