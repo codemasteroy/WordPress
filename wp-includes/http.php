@@ -555,8 +555,8 @@ function wp_http_validate_url( $url ) {
 		} else {
 			$ip = gethostbyname( $host );
 			if ( $ip === $host ) { // Error condition for gethostbyname()
-				$ip = false;
-		}
+				return false;
+			}
 		}
 		if ( $ip ) {
 			$parts = array_map( 'intval', explode( '.', $ip ) );
@@ -578,9 +578,9 @@ function wp_http_validate_url( $url ) {
 				 */
 				if ( ! apply_filters( 'http_request_host_is_external', false, $host, $url ) ) {
 					return false;
+				}
 			}
 		}
-	}
 	}
 
 	if ( empty( $parsed_url['port'] ) ) {
